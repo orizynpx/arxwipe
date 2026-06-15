@@ -11,6 +11,7 @@ import androidx.annotation.FloatRange;
 import androidx.annotation.IntRange;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+import io.github.orizynpx.arxwipe.R;
 
 import io.github.orizynpx.arxwipe.cardstackview.internal.CardStackSetting;
 import io.github.orizynpx.arxwipe.cardstackview.internal.CardStackSmoothScroller;
