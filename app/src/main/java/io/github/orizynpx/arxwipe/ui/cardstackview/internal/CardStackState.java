@@ -1,8 +1,8 @@
-package io.github.orizynpx.arxwipe.cardstackview.internal;
+package io.github.orizynpx.arxwipe.ui.cardstackview.internal;
 
 import androidx.recyclerview.widget.RecyclerView;
 
-import io.github.orizynpx.arxwipe.cardstackview.Direction;
+import io.github.orizynpx.arxwipe.ui.cardstackview.Direction;
 
 public class CardStackState {
     public Status status = Status.Idle;

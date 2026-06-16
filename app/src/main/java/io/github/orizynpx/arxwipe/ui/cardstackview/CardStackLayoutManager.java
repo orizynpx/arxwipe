@@ -1,4 +1,4 @@
-package io.github.orizynpx.arxwipe.cardstackview;
+package io.github.orizynpx.arxwipe.ui.cardstackview;
 
 import android.content.Context;
 import android.graphics.PointF;
@@ -13,10 +13,10 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import io.github.orizynpx.arxwipe.R;
 
-import io.github.orizynpx.arxwipe.cardstackview.internal.CardStackSetting;
-import io.github.orizynpx.arxwipe.cardstackview.internal.CardStackSmoothScroller;
-import io.github.orizynpx.arxwipe.cardstackview.internal.CardStackState;
-import io.github.orizynpx.arxwipe.cardstackview.internal.DisplayUtil;
+import io.github.orizynpx.arxwipe.ui.cardstackview.internal.CardStackSetting;
+import io.github.orizynpx.arxwipe.ui.cardstackview.internal.CardStackSmoothScroller;
+import io.github.orizynpx.arxwipe.ui.cardstackview.internal.CardStackState;
+import io.github.orizynpx.arxwipe.ui.cardstackview.internal.DisplayUtil;
 
 import java.util.List;
 

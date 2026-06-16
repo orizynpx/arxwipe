@@ -1,9 +1,9 @@
-package io.github.orizynpx.arxwipe.cardstackview.internal;
+package io.github.orizynpx.arxwipe.ui.cardstackview.internal;
 
 import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
 
-import io.github.orizynpx.arxwipe.cardstackview.CardStackLayoutManager;
+import io.github.orizynpx.arxwipe.ui.cardstackview.CardStackLayoutManager;
 
 public class CardStackDataObserver extends RecyclerView.AdapterDataObserver {
 

@@ -1,17 +1,17 @@
-package io.github.orizynpx.arxwipe.cardstackview;
+package io.github.orizynpx.arxwipe.ui.cardstackview;
 
-import android.view.animation.DecelerateInterpolator;
+import android.view.animation.AccelerateInterpolator;
 import android.view.animation.Interpolator;
 
-import io.github.orizynpx.arxwipe.cardstackview.internal.AnimationSetting;
+import io.github.orizynpx.arxwipe.ui.cardstackview.internal.AnimationSetting;
 
-public class RewindAnimationSetting implements AnimationSetting {
+public class SwipeAnimationSetting implements AnimationSetting {
 
     private final Direction direction;
     private final int duration;
     private final Interpolator interpolator;
 
-    private RewindAnimationSetting(
+    private SwipeAnimationSetting(
             Direction direction,
             int duration,
             Interpolator interpolator
@@ -37,27 +37,27 @@ public class RewindAnimationSetting implements AnimationSetting {
     }
 
     public static class Builder {
-        private Direction direction = Direction.Bottom;
+        private Direction direction = Direction.Right;
         private int duration = Duration.Normal.duration;
-        private Interpolator interpolator = new DecelerateInterpolator();
+        private Interpolator interpolator = new AccelerateInterpolator();
 
-        public RewindAnimationSetting.Builder setDirection(Direction direction) {
+        public Builder setDirection(Direction direction) {
             this.direction = direction;
             return this;
         }
 
-        public RewindAnimationSetting.Builder setDuration(int duration) {
+        public Builder setDuration(int duration) {
             this.duration = duration;
             return this;
         }
 
-        public RewindAnimationSetting.Builder setInterpolator(Interpolator interpolator) {
+        public Builder setInterpolator(Interpolator interpolator) {
             this.interpolator = interpolator;
             return this;
         }
 
-        public RewindAnimationSetting build() {
-            return new RewindAnimationSetting(
+        public SwipeAnimationSetting build() {
+            return new SwipeAnimationSetting(
                     direction,
                     duration,
                     interpolator

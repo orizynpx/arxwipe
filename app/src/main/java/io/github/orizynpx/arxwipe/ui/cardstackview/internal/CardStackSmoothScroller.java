@@ -1,10 +1,10 @@
-package io.github.orizynpx.arxwipe.cardstackview.internal;
+package io.github.orizynpx.arxwipe.ui.cardstackview.internal;
 
 import android.view.View;
 
-import io.github.orizynpx.arxwipe.cardstackview.CardStackLayoutManager;
-import io.github.orizynpx.arxwipe.cardstackview.CardStackListener;
-import io.github.orizynpx.arxwipe.cardstackview.RewindAnimationSetting;
+import io.github.orizynpx.arxwipe.ui.cardstackview.CardStackLayoutManager;
+import io.github.orizynpx.arxwipe.ui.cardstackview.CardStackListener;
+import io.github.orizynpx.arxwipe.ui.cardstackview.RewindAnimationSetting;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;

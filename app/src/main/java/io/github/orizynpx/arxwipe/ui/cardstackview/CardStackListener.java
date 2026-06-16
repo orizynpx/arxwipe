@@ -1,4 +1,4 @@
-package io.github.orizynpx.arxwipe.cardstackview;
+package io.github.orizynpx.arxwipe.ui.cardstackview;
 
 import android.view.View;
 

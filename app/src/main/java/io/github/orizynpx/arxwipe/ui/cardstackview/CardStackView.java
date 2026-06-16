@@ -1,4 +1,4 @@
-package io.github.orizynpx.arxwipe.cardstackview;
+package io.github.orizynpx.arxwipe.ui.cardstackview;
 
 import android.content.Context;
 import android.util.AttributeSet;
@@ -7,8 +7,8 @@ import android.view.MotionEvent;
 import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
 
-import io.github.orizynpx.arxwipe.cardstackview.internal.CardStackDataObserver;
-import io.github.orizynpx.arxwipe.cardstackview.internal.CardStackSnapHelper;
+import io.github.orizynpx.arxwipe.ui.cardstackview.internal.CardStackDataObserver;
+import io.github.orizynpx.arxwipe.ui.cardstackview.internal.CardStackSnapHelper;
 
 public class CardStackView extends RecyclerView {
 

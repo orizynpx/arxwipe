@@ -1,4 +1,4 @@
-package io.github.orizynpx.arxwipe.cardstackview.internal;
+package io.github.orizynpx.arxwipe.ui.cardstackview.internal;
 
 import android.view.View;
 
@@ -7,9 +7,9 @@ import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.SnapHelper;
 
-import io.github.orizynpx.arxwipe.cardstackview.CardStackLayoutManager;
-import io.github.orizynpx.arxwipe.cardstackview.Duration;
-import io.github.orizynpx.arxwipe.cardstackview.SwipeAnimationSetting;
+import io.github.orizynpx.arxwipe.ui.cardstackview.CardStackLayoutManager;
+import io.github.orizynpx.arxwipe.ui.cardstackview.Duration;
+import io.github.orizynpx.arxwipe.ui.cardstackview.SwipeAnimationSetting;
 
 public class CardStackSnapHelper extends SnapHelper {
 

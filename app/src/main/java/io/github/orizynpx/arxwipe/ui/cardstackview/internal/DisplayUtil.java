@@ -1,4 +1,4 @@
-package io.github.orizynpx.arxwipe.cardstackview.internal;
+package io.github.orizynpx.arxwipe.ui.cardstackview.internal;
 
 import android.content.Context;
 
