@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "89209522863",
+    "project_id": "arxwipe",
+    "storage_bucket": "arxwipe.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:89209522863:android:74d050e205942a5c66625a",
+        "android_client_info": {
+          "package_name": "io.github.orizynpx.arxwipe"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA8aUXDO74TSSnA2OIdYIMnLocPe_RVojc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
