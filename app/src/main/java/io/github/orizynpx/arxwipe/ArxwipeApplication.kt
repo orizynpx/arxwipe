@@ -5,9 +5,12 @@ import com.google.android.material.color.DynamicColors
 import dagger.hilt.android.HiltAndroidApp
 
 @HiltAndroidApp
-class ArXwipeApplication : Application() {
+class ArxwipeApplication : Application() {
     override fun onCreate() {
         super.onCreate()
+
+        Timber.plant(Timber.DebugTree())
+
         DynamicColors.applyToActivitiesIfAvailable(this)
     }
 }
