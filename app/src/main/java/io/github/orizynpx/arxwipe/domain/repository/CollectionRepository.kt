@@ -1,10 +1,12 @@
 package io.github.orizynpx.arxwipe.domain.repository
 
 import io.github.orizynpx.arxwipe.domain.model.PaperCollection
+import kotlinx.coroutines.flow.Flow
 import kotlin.uuid.Uuid
 
 interface CollectionRepository {
-    suspend fun getUserCollections(): List<PaperCollection>
+    fun getUserCollections(): Flow<List<PaperCollection>>
     suspend fun createCollection(name: String): PaperCollection
     suspend fun addPaperToCollection(paperId: String, collectionId: Uuid)
+    suspend fun removePaperFromCollection(paperId: String, collectionId: Uuid)
 }
