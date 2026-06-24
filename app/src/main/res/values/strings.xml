@@ -1,3 +1,22 @@
 <resources>
-    <string name="app_name">arXwipe</string>
+    <string name="app_name">Android Final Project</string>
+    
+    <string name="paper_progress">Paper %1$d of %2$d</string>
+    <string name="percentage_format">%1$d%%</string>
+    <string name="total_papers_format">%1$d of %1$d papers</string>
+    <string name="hundred_percent">100%</string>
+    <string name="added_to_read_later">Added to Read Later</string>
+    <string name="move_action">Move</string>
+
+    <string name="welcome_title">Welcome to ArXwipe</string>
+    <string name="welcome_description">What broad areas are you interested in?</string>
+    <string name="category_topics_title">Select Subcategories</string>
+    <string name="category_topics_description">Pick specific areas within your chosen fields.</string>
+    <string name="preferences_title">Preferences</string>
+    <string name="preferences_description">Customize your feed experience.</string>
+    <string name="btn_next">Next</string>
+    <string name="btn_back">Back</string>
+    <string name="btn_finish">Finish</string>
+    <string name="select_batch_size">Select Batch Size</string>
+    <string name="batch_size_format">%1$d papers</string>
 </resources>
