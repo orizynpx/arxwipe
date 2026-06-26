@@ -1,23 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/discoverRoot"
+    android:id="@+id/fragment_discover"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
     <com.google.android.material.appbar.AppBarLayout
-        android:id="@+id/appBar"
+        android:id="@+id/appbar_discover"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:layout_constraintTop_toTopOf="parent">
 
         <com.google.android.material.appbar.MaterialToolbar
-            android:id="@+id/toolbar"
+            android:id="@+id/toolbar_discover"
             android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            app:title="arxwipe"
+            android:layout_height="wrap_content"
+            app:title="@string/app_name"
             app:titleTextColor="?attr/colorPrimary"
-            app:menu="@menu/top_app_bar_menu" />
+            app:menu="@menu/appbar_discover_menu" />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -71,7 +71,7 @@
         android:padding="32dp"
         android:text="You've swiped everything today!"
         android:visibility="gone"
-        app:layout_constraintBottom_toTopOf="@+id/buttonRow"
+        app:layout_constraintBottom_toTopOf="@+id/btn_discover_row"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/appBar" />
@@ -82,13 +82,15 @@
         android:layout_height="0dp"
         android:clipToPadding="false"
         android:padding="8dp"
-        app:layout_constraintBottom_toTopOf="@+id/buttonRow"
+        app:layout_constraintBottom_toTopOf="@+id/btn_discover_row"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/appBar" />
 
     <LinearLayout
-        android:id="@+id/buttonRow"
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/btn_discover_row"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
@@ -96,31 +98,46 @@
         android:paddingVertical="16dp"
         app:layout_constraintBottom_toBottomOf="parent">
 
-        <com.google.android.material.floatingactionbutton.FloatingActionButton
-            style="?attr/floatingActionButtonMediumStyle"
-            android:id="@+id/dismissButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="32dp"
-            app:srcCompat="@android:drawable/ic_menu_close_clear_cancel"
-            app:materialThemeOverlay="@style/ThemeOverlay.Material3Expressive.FloatingActionButton.Secondary" />
+        <com.google.android.material.button.MaterialButton
+            style="@style/Widget.Material3.Button.IconButton.Filled"
+            android:id="@+id/btn_dismiss"
+            android:layout_width="64dp"
+            android:layout_height="64dp"
+            android:layout_marginEnd="24dp"
+            app:icon="@android:drawable/ic_menu_close_clear_cancel"
+            app:iconSize="24dp"
+            app:iconGravity="textStart"
+            android:padding="0dp"
+            app:backgroundTint="?attr/colorErrorContainer"
+            app:iconTint="?attr/colorOnErrorContainer"
+            android:contentDescription="Dismiss" />
 
-        <com.google.android.material.floatingactionbutton.FloatingActionButton
-            style="?attr/floatingActionButtonStyle"
-            android:id="@+id/undoButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            app:srcCompat="@android:drawable/ic_menu_revert"
-            app:materialThemeOverlay="@style/ThemeOverlay.Material3.FloatingActionButton.Surface" />
+        <com.google.android.material.button.MaterialButton
+            style="@style/Widget.Material3.Button.IconButton.Outlined"
+            android:id="@+id/btn_undo"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            app:icon="@android:drawable/ic_menu_revert"
+            app:iconSize="20dp"
+            app:iconGravity="textStart"
+            android:padding="0dp"
+            app:strokeColor="?attr/colorOutline"
+            app:iconTint="?attr/colorOnSurfaceVariant"
+            android:contentDescription="Undo" />
 
-        <com.google.android.material.floatingactionbutton.FloatingActionButton
-            style="?attr/floatingActionButtonMediumStyle"
-            android:id="@+id/readingListButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="32dp"
-            app:srcCompat="@android:drawable/star_big_on"
-            app:materialThemeOverlay="@style/ThemeOverlay.Material3Expressive.FloatingActionButton.Primary" />
+        <com.google.android.material.button.MaterialButton
+            style="@style/Widget.Material3.Button.IconButton.Filled"
+            android:id="@+id/btn_save_paper"
+            android:layout_width="64dp"
+            android:layout_height="64dp"
+            android:layout_marginStart="24dp"
+            app:icon="@android:drawable/star_big_on"
+            app:iconSize="24dp"
+            app:iconGravity="textStart"
+            android:padding="0dp"
+            app:backgroundTint="?attr/colorTertiaryContainer"
+            app:iconTint="?attr/colorOnTertiaryContainer"
+            android:contentDescription="Save paper" />
 
     </LinearLayout>
 
