@@ -2,18 +2,22 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item
         android:id="@+id/navigation_discover"
-        android:icon="@android:drawable/ic_menu_search"
-        android:title="Discover" />
+        android:enabled="true"
+        android:icon="@drawable/cards_stack_24dp_e3e3e3_fill0_wght400_grad0_opsz24"
+        android:title="@string/navbar_discover" />
     <item
         android:id="@+id/navigation_search"
-        android:icon="@android:drawable/ic_search_category_default"
-        android:title="Search" />
+        android:enabled="true"
+        android:icon="@drawable/search_24"
+        android:title="@string/navbar_search" />
     <item
         android:id="@+id/navigation_library"
-        android:icon="@android:drawable/ic_menu_save"
-        android:title="Library" />
+        android:enabled="true"
+        android:icon="@drawable/library_books_24dp_e3e3e3_fill0_wght400_grad0_opsz24"
+        android:title="@string/navbar_library" />
     <item
         android:id="@+id/navigation_profile"
-        android:icon="@android:drawable/ic_menu_myplaces"
-        android:title="Profile" />
+        android:enabled="true"
+        android:icon="@drawable/account_circle_24"
+        android:title="@string/navbar_profile" />
 </menu>

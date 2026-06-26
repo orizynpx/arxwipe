@@ -39,7 +39,6 @@
             app:layout_constraintEnd_toStartOf="@+id/nextButton"
             app:layout_constraintStart_toEndOf="@+id/backButton"
             app:layout_constraintTop_toTopOf="parent"
-            app:tabBackground="@drawable/tab_selector"
             app:tabIndicatorHeight="0dp"
             app:tabMaxWidth="12dp"
             app:tabRippleColor="@null" />

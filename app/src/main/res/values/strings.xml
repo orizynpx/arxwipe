@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Android Final Project</string>
+    <string name="app_name">arXwipe</string>
 
     <string name="paper_progress">Paper %1$d of %2$d</string>
     <string name="percentage_format">%1$d%%</string>
@@ -19,4 +19,8 @@
     <string name="btn_finish">Finish</string>
     <string name="select_batch_size">Select Batch Size</string>
     <string name="batch_size_format">%1$d papers</string>
+    <string name="navbar_discover">Discover</string>
+    <string name="navbar_search">Search</string>
+    <string name="navbar_library">Library</string>
+    <string name="navbar_profile">Profile</string>
 </resources>

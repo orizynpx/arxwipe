@@ -57,6 +57,8 @@ dependencies {
     implementation(libs.androidx.recyclerview)
     implementation(libs.hilt.android)
     ksp(libs.hilt.android.compiler)
+
+    ksp(libs.kotlin.metadata.jvm)
     implementation(libs.serialization)
 
     // Firebase things
@@ -78,4 +80,6 @@ dependencies {
 
     implementation(libs.retrofit)
     implementation(libs.okhttp)
+
+    implementation(libs.kotlinx.serialization.json)
 }
