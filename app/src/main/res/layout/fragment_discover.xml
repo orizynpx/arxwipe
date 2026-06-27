@@ -1,25 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/fragment_discover"
+    android:id="@+id/cl_discover_root"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
     <com.google.android.material.appbar.AppBarLayout
-        android:id="@+id/appbar_discover"
+        android:id="@+id/abl_discover"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:layout_constraintTop_toTopOf="parent">
 
         <com.google.android.material.appbar.MaterialToolbar
-            android:id="@+id/toolbar_discover"
+            android:id="@+id/tb_discover"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:title="@string/app_name"
-            app:titleTextColor="?attr/colorPrimary"
-            app:menu="@menu/appbar_discover_menu" />
+            android:layout_height="?attr/actionBarSize"
+            app:menu="@menu/top_app_bar_menu">
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="32dp"
+                android:src="@drawable/logo_arxwipe"
+                android:adjustViewBounds="true"
+                android:contentDescription="@string/app_name" />
+
+        </com.google.android.material.appbar.MaterialToolbar>
 
         <LinearLayout
+            android:id="@+id/ll_header"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
@@ -31,7 +39,7 @@
                 android:layout_height="wrap_content">
 
                 <TextView
-                    android:id="@+id/progressText"
+                    android:id="@+id/tv_progress"
                     style="?attr/textAppearanceLabelLarge"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -41,7 +49,7 @@
                     app:layout_constraintTop_toTopOf="parent" />
 
                 <TextView
-                    android:id="@+id/percentageText"
+                    android:id="@+id/tv_percentage"
                     style="?attr/textAppearanceLabelLarge"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -52,7 +60,7 @@
             </androidx.constraintlayout.widget.ConstraintLayout>
 
             <com.google.android.material.progressindicator.LinearProgressIndicator
-                android:id="@+id/progressBar"
+                android:id="@+id/lpi_progress"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
@@ -62,35 +70,62 @@
 
     </com.google.android.material.appbar.AppBarLayout>
 
-    <TextView
-        android:id="@+id/emptyStateText"
-        style="?attr/textAppearanceHeadlineSmall"
+    <com.google.android.material.progressindicator.CircularProgressIndicator
+        android:id="@+id/cpi_loading"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:indeterminate="true"
+        android:visibility="gone"
+        app:indicatorSize="48dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:trackThickness="4dp" />
+
+    <LinearLayout
+        android:id="@+id/ll_exhausted"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:gravity="center"
-        android:padding="32dp"
-        android:text="You've swiped everything today!"
+        android:orientation="vertical"
         android:visibility="gone"
-        app:layout_constraintBottom_toTopOf="@+id/btn_discover_row"
+        app:layout_constraintBottom_toTopOf="@+id/ll_buttons"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/appBar" />
+        app:layout_constraintTop_toBottomOf="@+id/abl_discover">
+
+        <TextView
+            android:id="@+id/tv_empty_state"
+            style="?attr/textAppearanceHeadlineSmall"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:padding="32dp"
+            android:text="You've swiped everything today!" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_arrange_batch"
+            style="@style/Widget.Material3.Button.TonalButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Arrange a new batch" />
+    </LinearLayout>
 
     <io.github.orizynpx.arxwipe.ui.cardstackview.CardStackView
-        android:id="@+id/cardStackView"
+        android:id="@+id/csv_papers"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:clipToPadding="false"
         android:padding="8dp"
-        app:layout_constraintBottom_toTopOf="@+id/btn_discover_row"
+        app:layout_constraintBottom_toTopOf="@+id/ll_buttons"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/appBar" />
+        app:layout_constraintTop_toBottomOf="@+id/abl_discover" />
 
     <LinearLayout
-        xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:app="http://schemas.android.com/apk/res-auto"
-        android:id="@+id/btn_discover_row"
+        android:id="@+id/ll_buttons"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
@@ -99,45 +134,64 @@
         app:layout_constraintBottom_toBottomOf="parent">
 
         <com.google.android.material.button.MaterialButton
-            style="@style/Widget.Material3.Button.IconButton.Filled"
             android:id="@+id/btn_dismiss"
+            style="?attr/materialIconButtonFilledStyle"
             android:layout_width="64dp"
             android:layout_height="64dp"
-            android:layout_marginEnd="24dp"
-            app:icon="@android:drawable/ic_menu_close_clear_cancel"
-            app:iconSize="24dp"
-            app:iconGravity="textStart"
+            android:layout_marginEnd="32dp"
+            android:insetLeft="0dp"
+            android:insetTop="0dp"
+            android:insetRight="0dp"
+            android:insetBottom="0dp"
+            android:minWidth="0dp"
+            android:minHeight="0dp"
             android:padding="0dp"
-            app:backgroundTint="?attr/colorErrorContainer"
-            app:iconTint="?attr/colorOnErrorContainer"
-            android:contentDescription="Dismiss" />
+            app:shapeAppearanceOverlay="@style/ShapeAppearance.Material3.Corner.Full"
+            app:backgroundTint="@color/md_theme_error"
+            app:icon="@drawable/cancel_24dp_e3e3e3_fill0_wght400_grad0_opsz24"
+            app:iconSize="32dp"
+            app:iconGravity="textStart"
+            app:iconTint="@color/md_theme_onError"
+            app:iconPadding="0dp" />
 
         <com.google.android.material.button.MaterialButton
-            style="@style/Widget.Material3.Button.IconButton.Outlined"
             android:id="@+id/btn_undo"
+            style="?attr/materialIconButtonOutlinedStyle"
             android:layout_width="48dp"
             android:layout_height="48dp"
-            app:icon="@android:drawable/ic_menu_revert"
-            app:iconSize="20dp"
-            app:iconGravity="textStart"
+            android:insetLeft="0dp"
+            android:insetTop="0dp"
+            android:insetRight="0dp"
+            android:insetBottom="0dp"
+            android:minWidth="0dp"
+            android:minHeight="0dp"
             android:padding="0dp"
-            app:strokeColor="?attr/colorOutline"
-            app:iconTint="?attr/colorOnSurfaceVariant"
-            android:contentDescription="Undo" />
-
-        <com.google.android.material.button.MaterialButton
-            style="@style/Widget.Material3.Button.IconButton.Filled"
-            android:id="@+id/btn_save_paper"
-            android:layout_width="64dp"
-            android:layout_height="64dp"
-            android:layout_marginStart="24dp"
-            app:icon="@android:drawable/star_big_on"
+            app:shapeAppearanceOverlay="@style/ShapeAppearance.Material3.Corner.Full"
+            app:icon="@drawable/undo_24dp_e3e3e3_fill0_wght400_grad0_opsz24"
             app:iconSize="24dp"
             app:iconGravity="textStart"
+            app:iconPadding="0dp" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_reading_list"
+            style="?attr/materialIconButtonFilledStyle"
+            android:layout_width="64dp"
+            android:layout_height="64dp"
+            android:layout_marginStart="32dp"
+            android:insetLeft="0dp"
+            android:insetTop="0dp"
+            android:insetRight="0dp"
+            android:insetBottom="0dp"
+            android:minWidth="0dp"
+            android:minHeight="0dp"
             android:padding="0dp"
-            app:backgroundTint="?attr/colorTertiaryContainer"
-            app:iconTint="?attr/colorOnTertiaryContainer"
-            android:contentDescription="Save paper" />
+            app:shapeAppearanceOverlay="@style/ShapeAppearance.Material3.Corner.Full"
+            app:backgroundTint="@color/md_theme_tertiary"
+            app:icon="@drawable/bookmark_add_24dp_e3e3e3_fill0_wght400_grad0_opsz24"
+            app:iconSize="32dp"
+            app:iconGravity="textStart"
+            app:iconTint="@color/md_theme_onTertiary"
+            app:iconPadding="0dp" />
 
     </LinearLayout>
 

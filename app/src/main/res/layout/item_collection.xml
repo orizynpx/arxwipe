@@ -13,7 +13,7 @@
         android:padding="16dp">
 
         <ImageView
-            android:id="@+id/collectionIcon"
+            android:id="@+id/iv_collection_icon"
             android:layout_width="40dp"
             android:layout_height="40dp"
             app:layout_constraintBottom_toBottomOf="parent"
@@ -23,27 +23,27 @@
             app:tint="?attr/colorPrimary" />
 
         <TextView
-            android:id="@+id/collectionName"
+            android:id="@+id/tv_collection_name"
             style="?attr/textAppearanceTitleMedium"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
             android:text="Collection Name"
-            app:layout_constraintEnd_toStartOf="@+id/moreButton"
-            app:layout_constraintStart_toEndOf="@+id/collectionIcon"
+            app:layout_constraintEnd_toStartOf="@+id/ib_more"
+            app:layout_constraintStart_toEndOf="@+id/iv_collection_icon"
             app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
-            android:id="@+id/paperCount"
+            android:id="@+id/tv_paper_count"
             style="?attr/textAppearanceBodySmall"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="12 papers"
-            app:layout_constraintStart_toStartOf="@+id/collectionName"
-            app:layout_constraintTop_toBottomOf="@+id/collectionName" />
+            app:layout_constraintStart_toStartOf="@+id/tv_collection_name"
+            app:layout_constraintTop_toBottomOf="@+id/tv_collection_name" />
 
         <ImageButton
-            android:id="@+id/moreButton"
+            android:id="@+id/ib_more"
             android:layout_width="48dp"
             android:layout_height="48dp"
             android:background="?attr/selectableItemBackgroundBorderless"

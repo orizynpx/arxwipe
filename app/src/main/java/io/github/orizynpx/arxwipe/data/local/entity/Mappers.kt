@@ -1,64 +1,54 @@
 package io.github.orizynpx.arxwipe.data.local.entity
 
+import io.github.orizynpx.arxwipe.R
 import io.github.orizynpx.arxwipe.domain.model.*
-import kotlinx.serialization.json.Json
-import kotlin.time.Instant
+import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
-private val json = Json { ignoreUnknownKeys = true }
-
-fun PaperEntity.toDomain(): ArxivPaper {
-    val authors: List<AuthorDb> = json.decodeFromString(authorsJson)
-    val categories: List<CategoryDb> = json.decodeFromString(categoriesJson)
-    val primary: CategoryDb = json.decodeFromString(primaryCategoryJson)
-
+@OptIn(ExperimentalUuidApi::class)
+fun PaperWithAuthors.toDomain(): ArxivPaper {
     return ArxivPaper(
-        arxivId = arxivId,
-        title = title,
-        summary = summary,
-        journalReference = journalReference,
-        abstractUrl = abstractUrl,
-        pdfUrl = pdfUrl,
-        htmlUrl = htmlUrl,
-        publishedAt = Instant.fromEpochMilliseconds(publishedAtMillis),
-        updatedAt = updatedAtMillis?.let { Instant.fromEpochMilliseconds(it) },
-        comment = comment,
-        authors = authors.map { PaperAuthor(Uuid.parse(it.id), it.name) },
-        allCategories = categories.map { CategoryDb ->
-            PaperCategory(
-                CategoryDb.id,
-                CategoryDb.displayName,
-                MainField.valueOf(CategoryDb.group),
-                CategoryDb.desc
-            )
-        },
+        arxivId = paper.arxivId,
+        title = paper.title,
+        authors = authors.map { PaperAuthor(authorId = Uuid.parse(it.authorId), name = it.name) },
+        summary = paper.summary,
+        journalReference = paper.journalReference,
         primaryCategory = PaperCategory(
-            primary.id,
-            primary.displayName,
-            MainField.valueOf(primary.group),
-            primary.desc
-        )
+            categoryId = paper.primaryCategoryId,
+            displayNameRes = ArxivTaxonomy.categories.find { it.categoryId == paper.primaryCategoryId }?.displayNameRes ?: R.string.no_results_found,
+            group = MainField.valueOf(paper.primaryCategoryGroup),
+            subGroupDescriptionRes = ArxivTaxonomy.categories.find { it.categoryId == paper.primaryCategoryId }?.subGroupDescriptionRes ?: R.string.no_results_found
+        ),
+        allCategories = paper.allCategoryIds.split(",")
+            .filter { it.isNotBlank() }
+            .mapNotNull { id ->
+                ArxivTaxonomy.categories.find { it.categoryId == id }
+            },
+        abstractUrl = paper.abstractUrl,
+        pdfUrl = paper.pdfUrl,
+        htmlUrl = paper.htmlUrl,
+        publishedAt = paper.publishedAt,
+        updatedAt = paper.updatedAt,
+        comment = paper.comment
     )
 }
 
 fun ArxivPaper.toEntity(): PaperEntity {
-    val authorsDb = authors.map { AuthorDb(it.authorId.toString(), it.name) }
-    val categoriesDb = allCategories.map { CategoryDb(it.categoryId, it.displayName, it.group.name, it.subGroupDescription) }
-    val primaryDb = CategoryDb(primaryCategory.categoryId, primaryCategory.displayName, primaryCategory.group.name, primaryCategory.subGroupDescription)
-
     return PaperEntity(
         arxivId = arxivId,
         title = title,
         summary = summary,
         journalReference = journalReference,
+        primaryCategoryId = primaryCategory.categoryId,
+        primaryCategoryDisplayName = "", 
+        primaryCategoryGroup = primaryCategory.group.name,
+        primaryCategorySubGroupDescription = "", 
+        allCategoryIds = allCategories.joinToString(",") { it.categoryId },
+        publishedAt = publishedAt,
+        updatedAt = updatedAt,
+        comment = comment,
         abstractUrl = abstractUrl,
         pdfUrl = pdfUrl,
-        htmlUrl = htmlUrl,
-        publishedAtMillis = publishedAt.toEpochMilliseconds(),
-        updatedAtMillis = updatedAt?.toEpochMilliseconds(),
-        comment = comment,
-        authorsJson = json.encodeToString(authorsDb),
-        categoriesJson = json.encodeToString(categoriesDb),
-        primaryCategoryJson = json.encodeToString(primaryDb)
+        htmlUrl = htmlUrl
     )
 }

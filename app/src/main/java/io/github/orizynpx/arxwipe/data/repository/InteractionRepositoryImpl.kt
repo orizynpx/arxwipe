@@ -1,58 +1,102 @@
 package io.github.orizynpx.arxwipe.data.repository
 
-import io.github.orizynpx.arxwipe.data.local.dao.ArxwipeDao
-import io.github.orizynpx.arxwipe.data.local.entity.SwipeEntity
-import io.github.orizynpx.arxwipe.data.local.entity.TriageQueueEntity
-import io.github.orizynpx.arxwipe.data.local.entity.toDomain
-import io.github.orizynpx.arxwipe.domain.model.SwipeInteraction
-import io.github.orizynpx.arxwipe.domain.model.SwipeType
-import io.github.orizynpx.arxwipe.domain.model.Triage
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 import io.github.orizynpx.arxwipe.domain.repository.InteractionRepository
+import io.github.orizynpx.arxwipe.domain.repository.PreferencesRepository
+import io.github.orizynpx.arxwipe.data.local.dao.InteractionDao
+import io.github.orizynpx.arxwipe.data.local.dao.PaperDao
+import io.github.orizynpx.arxwipe.data.local.entity.SwipeInteractionEntity
+import io.github.orizynpx.arxwipe.data.local.entity.TriagePaperCrossRef
+import io.github.orizynpx.arxwipe.data.local.entity.toDomain
+import io.github.orizynpx.arxwipe.domain.model.*
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 import kotlin.time.Instant
+import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
+@OptIn(ExperimentalUuidApi::class)
 class InteractionRepositoryImpl @Inject constructor(
-    private val dao: ArxwipeDao
+    private val interactionDao: InteractionDao,
+    private val paperDao: PaperDao,
+    private val preferencesRepository: PreferencesRepository,
+    private val firestore: FirebaseFirestore,
+    private val firebaseAuth: FirebaseAuth
 ) : InteractionRepository {
 
     override suspend fun recordSwipe(paperId: String, type: SwipeType) {
-        val swipeId = Uuid.parse(java.util.UUID.randomUUID().toString())
-        dao.insertSwipe(
-            SwipeEntity(
-                swipeId = swipeId.toString(),
-                paperId = paperId,
-                type = type.name,
-                interactedAtMillis = System.currentTimeMillis()
-            )
+        val swipe = SwipeInteractionEntity(
+            swipeId = Uuid.random().toString(),
+            paperId = paperId,
+            type = type.name,
+            interactedAt = Instant.fromEpochMilliseconds(System.currentTimeMillis())
         )
+        interactionDao.insertSwipe(swipe)
+
+        firebaseAuth.currentUser?.uid?.let { userId ->
+            val data = mapOf(
+                "paperId" to swipe.paperId,
+                "type" to swipe.type,
+                "interactedAt" to swipe.interactedAt.toString()
+            )
+            firestore.collection("users").document(userId)
+                .collection("interactions").document(swipe.swipeId)
+                .set(data)
+        }
+        
+        val currentIndex = preferencesRepository.getCurrentTriageIndex().first()
+        preferencesRepository.saveTriageIndex(currentIndex + 1)
     }
 
     override suspend fun getActiveTriage(): Triage? {
-        val papers = dao.getTriagePapers().map { it.toDomain() }
-        if (papers.isEmpty()) return null
+        val activePapers = paperDao.getActivePapersList()
+        if (activePapers.isEmpty()) return null
+        
         return Triage(
-            triageId = Uuid.parse(java.util.UUID.randomUUID().toString()),
-            papers = papers
+            triageId = Uuid.random(),
+            papers = activePapers.map { it.toDomain() }
         )
     }
 
     override suspend fun saveTriage(triage: Triage) {
-        dao.clearTriageQueue()
-        val queueEntities = triage.papers.mapIndexed { index, paper ->
-            TriageQueueEntity(paper.arxivId, index)
-        }
-        dao.insertTriageQueue(queueEntities)
+        val crossRefs = triage.papers.map { TriagePaperCrossRef(it.arxivId) }
+        interactionDao.insertTriagePapers(crossRefs)
     }
 
     override suspend fun undoLastSwipe(): SwipeInteraction? {
-        val lastSwipe = dao.getLastInteraction() ?: return null
-        dao.deleteSwipe(lastSwipe.swipeId)
+        val lastSwipeEntity = interactionDao.getLastInteraction() ?: return null
+        interactionDao.undoLastSwipe()
+        
+        val currentIndex = preferencesRepository.getCurrentTriageIndex().first()
+        if (currentIndex > 0) {
+            preferencesRepository.saveTriageIndex(currentIndex - 1)
+        }
+        
         return SwipeInteraction(
-            swipeId = Uuid.parse(lastSwipe.swipeId),
-            paperId = lastSwipe.paperId,
-            type = SwipeType.valueOf(lastSwipe.type),
-            interactedAt = Instant.fromEpochMilliseconds(lastSwipe.interactedAtMillis)
+            swipeId = Uuid.parse(lastSwipeEntity.swipeId),
+            paperId = lastSwipeEntity.paperId,
+            type = SwipeType.valueOf(lastSwipeEntity.type),
+            interactedAt = lastSwipeEntity.interactedAt
         )
+    }
+
+    override suspend fun clearTriage() {
+        interactionDao.clearTriage()
+    }
+
+    override suspend fun getSwipedPaperIds(): Set<String> {
+        return interactionDao.getAllSwipedPaperIds().toSet()
+    }
+
+    override fun getSwipedPaperIdsFlow(): Flow<Set<String>> {
+        return interactionDao.getAllSwipedPaperIdsFlow().map { it.toSet() }
+    }
+
+    override suspend fun replaceTriage(triage: Triage) {
+        val crossRefs = triage.papers.map { TriagePaperCrossRef(it.arxivId) }
+        interactionDao.replaceTriage(crossRefs)
     }
 }

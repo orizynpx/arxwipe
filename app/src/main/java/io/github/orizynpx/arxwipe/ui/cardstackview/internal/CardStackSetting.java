@@ -15,8 +15,8 @@ public class CardStackSetting {
     public StackFrom stackFrom = StackFrom.None;
     public int visibleCount = 3;
     public float translationInterval = 8.0f;
-    public float scaleInterval = 0.95f; // 0.0f - 1.0f
-    public float swipeThreshold = 0.3f; // 0.0f - 1.0f
+    public float scaleInterval = 0.95f; 
+    public float swipeThreshold = 0.3f; 
     public float maxDegree = 20.0f;
     public List<Direction> directions = Direction.HORIZONTAL;
     public boolean canScrollHorizontal = true;

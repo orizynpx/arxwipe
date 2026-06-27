@@ -2,13 +2,15 @@ package io.github.orizynpx.arxwipe.ui.cardstackview;
 
 import android.view.View;
 
+import androidx.annotation.Nullable;
+
 public interface CardStackListener {
     void onCardDragging(Direction direction, float ratio);
     void onCardSwiped(Direction direction);
     void onCardRewound();
     void onCardCanceled();
-    void onCardAppeared(View view, int position);
-    void onCardDisappeared(View view, int position);
+    void onCardAppeared(@Nullable View view, int position);
+    void onCardDisappeared(@Nullable View view, int position);
 
     CardStackListener DEFAULT = new CardStackListener() {
         @Override
@@ -20,8 +22,8 @@ public interface CardStackListener {
         @Override
         public void onCardCanceled() {}
         @Override
-        public void onCardAppeared(View view, int position) {}
+        public void onCardAppeared(@Nullable View view, int position) {}
         @Override
-        public void onCardDisappeared(View view, int position) {}
+        public void onCardDisappeared(@Nullable View view, int position) {}
     };
 }

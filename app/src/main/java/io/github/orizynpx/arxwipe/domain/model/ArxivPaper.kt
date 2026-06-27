@@ -21,4 +21,19 @@ data class ArxivPaper(
     val updatedAt: Instant?,
 
     val comment: String?,
-)
+) {
+    val hasPdf: Boolean get() = !pdfUrl.isNullOrBlank()
+
+    val hasHtml: Boolean get() = !htmlUrl.isNullOrBlank()
+
+    val formattedAuthors: String
+        get() = authors.joinToString(", ") { it.name }
+
+    fun matchesQuery(query: String): Boolean {
+        if (query.isBlank()) return true
+        val lowercaseQuery = query.lowercase()
+        return title.lowercase().contains(lowercaseQuery) ||
+                summary.lowercase().contains(lowercaseQuery) ||
+                authors.any { it.name.lowercase().contains(lowercaseQuery) }
+    }
+}

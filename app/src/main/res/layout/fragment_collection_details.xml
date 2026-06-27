@@ -5,17 +5,18 @@
     android:layout_height="match_parent">
 
     <com.google.android.material.appbar.AppBarLayout
-        android:id="@+id/appBar"
+        android:id="@+id/abl_collection_details"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:layout_constraintTop_toTopOf="parent">
 
         <com.google.android.material.appbar.MaterialToolbar
-            android:id="@+id/toolbar"
+            android:id="@+id/tb_collection_details"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            app:navigationIcon="@android:drawable/ic_menu_revert"
-            app:title="Collection Name" />
+            app:navigationIcon="@drawable/arrow_back_24dp_e3e3e3_fill0_wght400_grad0_opsz24"
+            app:title="Collection Name"
+            app:menu="@menu/appbar_collection_detail_menu" />
 
         <HorizontalScrollView
             android:layout_width="match_parent"
@@ -25,13 +26,13 @@
             android:scrollbars="none">
 
             <com.google.android.material.chip.ChipGroup
-                android:id="@+id/sortChipGroup"
+                android:id="@+id/cg_sort"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 app:singleSelection="true">
 
                 <com.google.android.material.chip.Chip
-                    android:id="@+id/sortLatestChip"
+                    android:id="@+id/cp_sort_latest"
                     style="@style/Widget.Material3.Chip.Filter"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -39,7 +40,7 @@
                     android:text="Latest" />
 
                 <com.google.android.material.chip.Chip
-                    android:id="@+id/sortTitleChip"
+                    android:id="@+id/cp_sort_title"
                     style="@style/Widget.Material3.Chip.Filter"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -50,10 +51,10 @@
     </com.google.android.material.appbar.AppBarLayout>
 
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/papersRecyclerView"
+        android:id="@+id/rv_papers"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/appBar" />
+        app:layout_constraintTop_toBottomOf="@+id/abl_collection_details" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -105,14 +105,20 @@ public class CardStackSmoothScroller extends RecyclerView.SmoothScroller {
         switch (type) {
             case AutomaticSwipe:
                 state.next(CardStackState.Status.AutomaticSwipeAnimating);
-                listener.onCardDisappeared(manager.getTopView(), manager.getTopPosition());
+                View topViewForAutomaticSwipe = manager.getTopView();
+                if (topViewForAutomaticSwipe != null) {
+                    listener.onCardDisappeared(topViewForAutomaticSwipe, manager.getTopPosition());
+                }
                 break;
             case AutomaticRewind:
                 state.next(CardStackState.Status.RewindAnimating);
                 break;
             case ManualSwipe:
                 state.next(CardStackState.Status.ManualSwipeAnimating);
-                listener.onCardDisappeared(manager.getTopView(), manager.getTopPosition());
+                View topViewForManualSwipe = manager.getTopView();
+                if (topViewForManualSwipe != null) {
+                    listener.onCardDisappeared(topViewForManualSwipe, manager.getTopPosition());
+                }
                 break;
             case ManualCancel:
                 state.next(CardStackState.Status.RewindAnimating);
@@ -125,14 +131,17 @@ public class CardStackSmoothScroller extends RecyclerView.SmoothScroller {
         CardStackListener listener = manager.getCardStackListener();
         switch (type) {
             case AutomaticSwipe:
-                // Notify callback from CardStackLayoutManager
+                
                 break;
             case AutomaticRewind:
                 listener.onCardRewound();
-                listener.onCardAppeared(manager.getTopView(), manager.getTopPosition());
+                View topView = manager.getTopView();
+                if (topView != null) {
+                    listener.onCardAppeared(topView, manager.getTopPosition());
+                }
                 break;
             case ManualSwipe:
-                // Notify callback from CardStackLayoutManager
+                
                 break;
             case ManualCancel:
                 listener.onCardCanceled();

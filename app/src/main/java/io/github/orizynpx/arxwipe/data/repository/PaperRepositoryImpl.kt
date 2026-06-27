@@ -1,78 +1,193 @@
 package io.github.orizynpx.arxwipe.data.repository
 
-import android.content.Context
-import dagger.hilt.android.qualifiers.ApplicationContext
-import io.github.orizynpx.arxwipe.data.local.dao.ArxwipeDao
+import io.github.orizynpx.arxwipe.data.local.dao.PaperDao
+import io.github.orizynpx.arxwipe.data.local.entity.AuthorEntity
+import io.github.orizynpx.arxwipe.data.local.entity.PaperAuthorCrossRef
 import io.github.orizynpx.arxwipe.data.local.entity.toDomain
 import io.github.orizynpx.arxwipe.data.local.entity.toEntity
 import io.github.orizynpx.arxwipe.data.remote.ArxivApiService
+import io.github.orizynpx.arxwipe.data.remote.dto.ArxivFeedDto
 import io.github.orizynpx.arxwipe.data.remote.dto.toDomain
-import io.github.orizynpx.arxwipe.data.remote.parser.ArxivXmlParser
-import io.github.orizynpx.arxwipe.domain.model.ArxivPaper
-import io.github.orizynpx.arxwipe.domain.model.MainField
-import io.github.orizynpx.arxwipe.domain.model.OnboardingPrefs
-import io.github.orizynpx.arxwipe.domain.model.PaperCategory
+import io.github.orizynpx.arxwipe.domain.model.*
 import io.github.orizynpx.arxwipe.domain.repository.PaperRepository
+import io.github.orizynpx.arxwipe.domain.repository.PreferencesRepository
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
+import kotlinx.serialization.decodeFromString
+import nl.adaptivity.xmlutil.serialization.XML
+import timber.log.Timber
 import javax.inject.Inject
-import javax.inject.Singleton
+import kotlin.uuid.ExperimentalUuidApi
 
-@Singleton
+@OptIn(ExperimentalUuidApi::class)
 class PaperRepositoryImpl @Inject constructor(
-    @ApplicationContext private val context: Context,
-    private val dao: ArxwipeDao,
-    private val api: ArxivApiService
+    private val paperDao: PaperDao,
+    private val apiService: ArxivApiService,
+    private val xml: XML,
+    private val preferencesRepository: PreferencesRepository
 ) : PaperRepository {
 
-    private val prefs = context.getSharedPreferences("arxwipe_prefs", Context.MODE_PRIVATE)
-    private val _onboardingFlow = MutableStateFlow(loadPrefs())
+    override suspend fun getDiscoveryFeed(
+        categoryId: String?,
+        limit: Int,
+        forceRefresh: Boolean
+    ): List<ArxivPaper> {
+        val lastFetch = preferencesRepository.getLastFetchTime().first()
+        val currentTime = System.currentTimeMillis()
+        val twentyFourHoursInMillis = 86_400_000L
 
-    private fun loadPrefs(): OnboardingPrefs {
-        val categories = prefs.getStringSet("selected_categories", emptySet())?.toList() ?: emptyList()
-        val batchSize = prefs.getInt("batch_size", 20)
-        return OnboardingPrefs(categories, batchSize)
+        return if (forceRefresh || (currentTime - lastFetch >= twentyFourHoursInMillis)) {
+            val searchQuery = categoryId?.let { 
+                if (it.endsWith("*")) "cat:${it.replace("*", "")}*" else "cat:$it"
+            } ?: "all"
+            try {
+                val responseBody = apiService.getPapers(
+                    searchQuery = searchQuery,
+                    maxResults = 100,
+                    sortBy = "submittedDate",
+                    sortOrder = "descending"
+                )
+                val xmlString = responseBody.string()
+                val feed = xml.decodeFromString<ArxivFeedDto>(xmlString)
+                val papers = feed.entries.map { it.toDomain() }
+
+                cachePapers(papers)
+
+                preferencesRepository.saveLastFetchTime(currentTime)
+                papers
+            } catch (e: Exception) {
+                Timber.e(e, "Failed to fetch discovery feed for category: $categoryId")
+                fetchFromLocal(categoryId, limit)
+            }
+        } else {
+            Timber.d("24 hours have not elapsed. Skipping network request and reading from local cache.")
+            fetchFromLocal(categoryId, limit)
+        }
     }
 
-    override suspend fun getDiscoveryFeed(categoryId: String?, limit: Int): List<ArxivPaper> {
-        val query = categoryId?.let { "cat:$it" } ?: "all"
-        return try {
-            val responseBody = api.getPapers(searchQuery = query, maxResults = limit)
-            val parsedEntries = ArxivXmlParser.parse(responseBody.byteStream())
-            val papers = parsedEntries.map { it.toDomain() }
+    override suspend fun getCachedPapers(categoryId: String?, limit: Int): List<ArxivPaper> {
+        return fetchFromLocal(categoryId, limit)
+    }
 
-            dao.insertPapers(papers.map { it.toEntity() })
-            papers
+    override suspend fun fetchAndCachePapers(categoryId: String?, targetCount: Int): List<ArxivPaper> {
+        val searchQuery = categoryId?.let { 
+            if (it.endsWith("*")) "cat:${it.replace("*", "")}*" else "cat:$it"
+        } ?: "all"
+        
+        val accumulated = LinkedHashMap<String, ArxivPaper>()
+        var start = 0
+        try {
+            while (accumulated.size < targetCount && start < MAX_PAGINATION_RESULTS) {
+                val responseBody = apiService.getPapers(
+                    searchQuery = searchQuery,
+                    maxResults = PAGE_SIZE,
+                    start = start,
+                    sortBy = "submittedDate",
+                    sortOrder = "descending"
+                )
+                val xmlString = responseBody.string()
+                val feed = xml.decodeFromString<ArxivFeedDto>(xmlString)
+                val papers = feed.entries.map { it.toDomain() }
+                if (papers.isEmpty()) break
+
+                cachePapers(papers)
+                papers.forEach { accumulated[it.arxivId] = it }
+                Timber.d("Paginated fetch category=$categoryId start=$start got=${papers.size} total=${accumulated.size}")
+                start += PAGE_SIZE
+            }
+            if (accumulated.isNotEmpty()) {
+                preferencesRepository.saveLastFetchTime(System.currentTimeMillis())
+            }
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
-            dao.getAllCachedPapers(limit).map { it.toDomain() }
+            Timber.e(e, "Paginated fetch failed for category=$categoryId at start=$start")
+        }
+        return accumulated.values.toList()
+    }
+
+    
+    private suspend fun cachePapers(papers: List<ArxivPaper>) {
+        papers.forEach { paper ->
+            val paperEntity = paper.toEntity()
+            val authors = paper.authors.map { AuthorEntity(it.authorId.toString(), it.name) }
+            val crossRefs = paper.authors.map { PaperAuthorCrossRef(paper.arxivId, it.authorId.toString()) }
+            paperDao.insertPaperWithAuthors(paperEntity, authors, crossRefs)
+        }
+    }
+
+    private suspend fun fetchFromLocal(categoryId: String?, limit: Int): List<ArxivPaper> {
+        return if (categoryId != null) {
+            val pattern = if (categoryId.endsWith("*")) {
+                categoryId.replace("*", "%")
+            } else {
+                categoryId
+            }
+            paperDao.getPapersByCategory(pattern, limit).map { it.toDomain() }
+        } else {
+            paperDao.getAllPapers(limit).map { it.toDomain() }
         }
     }
 
     override suspend fun getPaperById(paperId: String): ArxivPaper? {
-        return dao.getPaperById(paperId)?.toDomain()
+        return paperDao.getPaperWithAuthorsById(paperId)?.toDomain()
     }
 
     override suspend fun getAvailableCategories(): List<PaperCategory> {
-        return listOf(
-            PaperCategory("cs.AI", "Artificial Intelligence", MainField.COMPUTER_SCIENCE, "AI"),
-            PaperCategory("cs.LG", "Machine Learning", MainField.COMPUTER_SCIENCE, "ML"),
-            PaperCategory("cs.CV", "Computer Vision", MainField.COMPUTER_SCIENCE, "CV"),
-            PaperCategory("cs.CL", "Natural Language Processing", MainField.COMPUTER_SCIENCE, "NLP"),
-            PaperCategory("stat.ML", "Statistics - Machine Learning", MainField.STATISTICS, "Stat ML"),
-            PaperCategory("math.ST", "Mathematical Statistics", MainField.MATHEMATICS, "Math Stat")
+        return ArxivTaxonomy.categories
+    }
+
+    override suspend fun searchPapers(
+        query: String,
+        categoryIds: List<String>,
+        start: Int
+    ): List<ArxivPaper> {
+        
+        
+        val trimmedQuery = query.trim()
+        val catClause = categoryIds.filter { it.isNotBlank() }
+            .takeIf { it.isNotEmpty() }
+            ?.joinToString(separator = " OR ") { "cat:$it" }
+            ?.let { "($it)" }
+        val termClause = trimmedQuery.takeIf { it.isNotEmpty() }?.let { "all:$it" }
+        
+        val searchQuery = listOfNotNull(catClause, termClause)
+            .joinToString(separator = " AND ")
+            .ifBlank { "all" }
+
+        val responseBody = apiService.getPapers(
+            searchQuery = searchQuery,
+            maxResults = SEARCH_PAGE_SIZE,
+            start = start,
+            
+            sortBy = "lastUpdatedDate",
+            sortOrder = "descending"
         )
+        val xmlString = responseBody.string()
+        val feed = xml.decodeFromString<ArxivFeedDto>(xmlString)
+        val papers = feed.entries.map { it.toDomain() }
+        
+        cachePapers(papers)
+        return papers
     }
 
-    override suspend fun saveOnboardingPreferences(categoryIds: List<String>, batchSize: Int) {
-        prefs.edit()
-            .putStringSet("selected_categories", categoryIds.toSet())
-            .putInt("batch_size", batchSize)
-            .apply()
-        _onboardingFlow.value = OnboardingPrefs(categoryIds, batchSize)
+    override fun getActiveTriagePapers(): Flow<List<ArxivPaper>> {
+        return paperDao.getActivePapers().map { papers ->
+            papers.map { it.toDomain() }
+        }
     }
 
-    override fun getOnboardingPreferences(): Flow<OnboardingPrefs> {
-        return _onboardingFlow.asStateFlow()
+    override suspend fun saveOnboardingPreferences(selectedCategoryIds: List<String>, batchSize: Int) {
+        preferencesRepository.saveOnboardingPreferences(selectedCategoryIds, batchSize)
+    }
+
+    private companion object {
+        const val PAGE_SIZE = 50
+        
+        const val MAX_PAGINATION_RESULTS = 250
+        
+        const val SEARCH_PAGE_SIZE = 50
     }
 }

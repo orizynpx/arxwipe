@@ -7,10 +7,8 @@ import kotlin.uuid.Uuid
 interface CollectionRepository {
     fun getUserCollections(): Flow<List<PaperCollection>>
     suspend fun createCollection(name: String): PaperCollection
-
     suspend fun updateCollection(collectionId: Uuid, name: String)
     suspend fun deleteCollection(collectionId: Uuid)
-
     suspend fun addPaperToCollection(paperId: String, collectionId: Uuid)
     suspend fun removePaperFromCollection(paperId: String, collectionId: Uuid)
 }

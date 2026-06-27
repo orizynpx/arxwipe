@@ -1,68 +1,124 @@
 package io.github.orizynpx.arxwipe.data.repository
 
-import io.github.orizynpx.arxwipe.data.local.dao.ArxwipeDao
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
+import io.github.orizynpx.arxwipe.data.local.dao.CollectionDao
 import io.github.orizynpx.arxwipe.data.local.entity.CollectionEntity
+import io.github.orizynpx.arxwipe.data.local.entity.CollectionPaperCrossRef
 import io.github.orizynpx.arxwipe.data.local.entity.toDomain
 import io.github.orizynpx.arxwipe.domain.model.PaperCollection
 import io.github.orizynpx.arxwipe.domain.repository.CollectionRepository
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
-import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
+import kotlinx.coroutines.launch
 import javax.inject.Inject
+import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
+@OptIn(ExperimentalUuidApi::class)
 class CollectionRepositoryImpl @Inject constructor(
-    private val dao: ArxwipeDao
+    private val collectionDao: CollectionDao,
+    private val firestore: FirebaseFirestore,
+    private val firebaseAuth: FirebaseAuth,
 ) : CollectionRepository {
-    private val json = Json { ignoreUnknownKeys = true }
+
+    init {
+        CoroutineScope(Dispatchers.IO).launch {
+            val collections = collectionDao.getUserCollections().first()
+            if (collections.none { it.name == "Read Later" }) {
+                collectionDao.insertCollection(
+                    CollectionEntity(
+                        collectionId = "00000000-0000-0000-0000-000000000000", 
+                        name = "Read Later"
+                    )
+                )
+            }
+        }
+    }
 
     override fun getUserCollections(): Flow<List<PaperCollection>> {
-        return dao.observeCollections().map { entities ->
-            entities.map { entity ->
-                val paperIds: List<String> = json.decodeFromString(entity.paperIdsJson)
-                val papers = paperIds.mapNotNull { id -> dao.getPaperById(id)?.toDomain() }
+        return collectionDao.getUserCollectionsWithPapers().map { collectionsWithPapers ->
+            collectionsWithPapers.map { item ->
                 PaperCollection(
-                    collectionId = Uuid.parse(entity.collectionId),
-                    name = entity.name,
-                    papers = papers
+                    collectionId = Uuid.parse(item.collection.collectionId),
+                    name = item.collection.name,
+                    papers = item.papers.map { it.toDomain() }
                 )
             }
         }
     }
 
     override suspend fun createCollection(name: String): PaperCollection {
-        val id = Uuid.parse(java.util.UUID.randomUUID().toString())
-        val entity = CollectionEntity(id.toString(), name, "[]")
-        dao.insertCollection(entity)
-        return PaperCollection(id, name, emptyList())
+        val collectionId = Uuid.random()
+        val entity = CollectionEntity(
+            collectionId = collectionId.toString(),
+            name = name
+        )
+        collectionDao.insertCollection(entity)
+        
+        firebaseAuth.currentUser?.uid?.let { userId ->
+            val data = mapOf(
+                "name" to name
+            )
+            firestore.collection("users").document(userId)
+                .collection("collections").document(entity.collectionId)
+                .set(data)
+        }
+
+        return PaperCollection(
+            collectionId = collectionId,
+            name = name,
+            papers = emptyList()
+        )
     }
 
     override suspend fun updateCollection(collectionId: Uuid, name: String) {
-        val existing = dao.getCollections().find { it.collectionId == collectionId.toString() }
-        val paperIdsJson = existing?.paperIdsJson ?: "[]"
-        dao.insertCollection(CollectionEntity(collectionId.toString(), name, paperIdsJson))
+        collectionDao.insertCollection(
+            CollectionEntity(
+                collectionId = collectionId.toString(),
+                name = name
+            )
+        )
+        
+        firebaseAuth.currentUser?.uid?.let { userId ->
+            val data = mapOf(
+                "name" to name
+            )
+            firestore.collection("users").document(userId)
+                .collection("collections").document(collectionId.toString())
+                .update(data)
+        }
     }
 
     override suspend fun deleteCollection(collectionId: Uuid) {
-        dao.deleteCollection(collectionId.toString())
+        collectionDao.deleteCollectionById(collectionId.toString())
     }
 
     override suspend fun addPaperToCollection(paperId: String, collectionId: Uuid) {
-        val existing = dao.getCollections().find { it.collectionId == collectionId.toString() } ?: return
-        val paperIds: List<String> = json.decodeFromString(existing.paperIdsJson)
-        if (paperId !in paperIds) {
-            val updated = paperIds + paperId
-            dao.insertCollection(existing.copy(paperIdsJson = json.encodeToString(updated)))
+        collectionDao.insertCollectionPaperCrossRef(
+            CollectionPaperCrossRef(
+                collectionId = collectionId.toString(),
+                arxivId = paperId
+            )
+        )
+
+        firebaseAuth.currentUser?.uid?.let { userId ->
+            firestore.collection("users").document(userId)
+                .collection("collections").document(collectionId.toString())
+                .collection("papers").document(paperId)
+                .set(mapOf("arxivId" to paperId))
         }
     }
 
     override suspend fun removePaperFromCollection(paperId: String, collectionId: Uuid) {
-        val existing = dao.getCollections().find { it.collectionId == collectionId.toString() } ?: return
-        val paperIds: List<String> = json.decodeFromString(existing.paperIdsJson)
-        if (paperId in paperIds) {
-            val updated = paperIds - paperId
-            dao.insertCollection(existing.copy(paperIdsJson = json.encodeToString(updated)))
-        }
+        collectionDao.deleteCollectionPaperCrossRef(
+            CollectionPaperCrossRef(
+                collectionId = collectionId.toString(),
+                arxivId = paperId
+            )
+        )
     }
 }

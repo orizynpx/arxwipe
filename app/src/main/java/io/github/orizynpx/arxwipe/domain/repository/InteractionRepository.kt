@@ -9,4 +9,8 @@ interface InteractionRepository {
     suspend fun getActiveTriage(): Triage?
     suspend fun saveTriage(triage: Triage)
     suspend fun undoLastSwipe(): SwipeInteraction?
+    suspend fun clearTriage()
+    suspend fun getSwipedPaperIds(): Set<String>
+    fun getSwipedPaperIdsFlow(): kotlinx.coroutines.flow.Flow<Set<String>>
+    suspend fun replaceTriage(triage: Triage)
 }

@@ -17,42 +17,44 @@
             android:orientation="vertical"
             android:padding="20dp">
 
+            <com.google.android.material.chip.ChipGroup
+                android:id="@+id/chipGroup"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:chipSpacingHorizontal="8dp"
+                app:singleLine="false" />
+
+            <TextView
+                android:id="@+id/paperTitle"
+                style="?attr/textAppearanceTitleLarge"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:text="Deep Residual Learning for Image Recognition"
+                android:textColor="?attr/colorOnSurface"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/paperAuthors"
+                style="?attr/textAppearanceBodyMedium"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:ellipsize="end"
+                android:maxLines="2"
+                android:text="Kaiming He, Xiangyu Zhang, Shaoqing Ren, Jian Sun"
+                android:textColor="?attr/colorOnSurfaceVariant" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginTop="16dp"
+                android:background="?attr/colorOutlineVariant" />
+
             <androidx.core.widget.NestedScrollView
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_marginTop="16dp">
-
-                <com.google.android.material.chip.ChipGroup
-                    android:id="@+id/chipGroup"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    app:chipSpacingHorizontal="8dp" />
-
-                <TextView
-                    android:id="@+id/paperTitle"
-                    style="?attr/textAppearanceTitleLarge"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="12dp"
-                    android:text="Deep Residual Learning for Image Recognition"
-                    android:textColor="?attr/colorOnSurface"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:id="@+id/paperAuthors"
-                    style="?attr/textAppearanceBodyMedium"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
-                    android:text="Kaiming He, Xiangyu Zhang, Shaoqing Ren, Jian Sun"
-                    android:textColor="?attr/colorOnSurfaceVariant" />
-
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="1dp"
-                    android:layout_marginTop="16dp"
-                    android:background="?attr/colorOutlineVariant" />
-
 
                 <TextView
                     android:id="@+id/paperAbstract"
@@ -66,21 +68,20 @@
 
         </LinearLayout>
 
-        <!-- Overlays for Swipe Feedback -->
+        
         <FrameLayout
             android:id="@+id/left_overlay"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:alpha="0"
-            android:background="?attr/colorError">
-
+            android:background="?attr/colorError"
+            android:alpha="0">
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:text="DISMISS"
-                android:textColor="?attr/colorOnError"
                 android:textSize="40sp"
+                android:textColor="?attr/colorOnError"
                 android:textStyle="bold" />
         </FrameLayout>
 
@@ -88,16 +89,15 @@
             android:id="@+id/right_overlay"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:alpha="0"
-            android:background="?attr/colorPrimary">
-
+            android:background="?attr/colorTertiary"
+            android:alpha="0">
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:text="SAVE"
-                android:textColor="?attr/colorOnPrimary"
                 android:textSize="40sp"
+                android:textColor="?attr/colorOnTertiary"
                 android:textStyle="bold" />
         </FrameLayout>
 
@@ -105,16 +105,15 @@
             android:id="@+id/top_overlay"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:alpha="0"
-            android:background="?attr/colorSecondary">
-
+            android:background="?attr/colorSecondary"
+            android:alpha="0">
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:text="UP"
-                android:textColor="?attr/colorOnSecondary"
                 android:textSize="40sp"
+                android:textColor="?attr/colorOnSecondary"
                 android:textStyle="bold" />
         </FrameLayout>
 
@@ -122,16 +121,15 @@
             android:id="@+id/bottom_overlay"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:alpha="0"
-            android:background="?attr/colorTertiary">
-
+            android:background="?attr/colorTertiary"
+            android:alpha="0">
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:text="UNDO"
-                android:textColor="?attr/colorOnTertiary"
                 android:textSize="40sp"
+                android:textColor="?attr/colorOnTertiary"
                 android:textStyle="bold" />
         </FrameLayout>
 

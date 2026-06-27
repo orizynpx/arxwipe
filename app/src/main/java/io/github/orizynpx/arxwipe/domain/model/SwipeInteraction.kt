@@ -10,3 +10,7 @@ data class SwipeInteraction(
     val interactedAt: Instant
 )
 
+enum class SwipeType {
+    DISMISS,
+    SAVE
+}

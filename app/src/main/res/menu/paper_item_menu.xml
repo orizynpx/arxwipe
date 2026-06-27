@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item
-        android:id="@+id/action_move"
-        android:title="Move to Collections" />
+        android:id="@+id/mi_move"
+        android:title="@string/menu_move_to_collection" />
     <item
-        android:id="@+id/action_remove"
-        android:title="Remove from Collection" />
+        android:id="@+id/mi_remove"
+        android:title="@string/menu_remove_from_collection" />
 </menu>

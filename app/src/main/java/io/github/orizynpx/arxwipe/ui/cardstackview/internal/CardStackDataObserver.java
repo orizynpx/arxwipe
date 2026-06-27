@@ -21,30 +21,30 @@ public class CardStackDataObserver extends RecyclerView.AdapterDataObserver {
 
     @Override
     public void onItemRangeChanged(int positionStart, int itemCount) {
-        // Do nothing
+        
     }
 
     @Override
     public void onItemRangeChanged(int positionStart, int itemCount, @Nullable Object payload) {
-        // Do nothing
+        
     }
 
     @Override
     public void onItemRangeInserted(int positionStart, int itemCount) {
-        // Do nothing
+        
     }
 
     @Override
     public void onItemRangeRemoved(int positionStart, int itemCount) {
-        // 要素が削除された場合はTopPositionの調整が必要になる場合がある
-        // 具体的には、要素が全て削除された場合と、TopPositionより前の要素が削除された場合は調整が必要
+        
+        
         CardStackLayoutManager manager = getCardStackLayoutManager();
         int topPosition = manager.getTopPosition();
         if (manager.getItemCount() == 0) {
-            // 要素が全て削除された場合
+            
             manager.setTopPosition(0);
         } else if (positionStart < topPosition) {
-            // TopPositionよりも前の要素が削除された場合
+            
             int diff = topPosition - positionStart;
             manager.setTopPosition(Math.min(topPosition - diff, manager.getItemCount() - 1));
         }
