@@ -12,8 +12,6 @@ import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.checkbox.MaterialCheckBox
 import io.github.orizynpx.arxwipe.R
-import io.github.orizynpx.arxwipe.domain.model.FilterCategory
-import io.github.orizynpx.arxwipe.domain.model.FilterSubcategory
 import io.github.orizynpx.arxwipe.domain.model.SearchFilterCategories
 
 

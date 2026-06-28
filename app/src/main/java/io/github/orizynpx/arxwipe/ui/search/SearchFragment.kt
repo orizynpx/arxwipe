@@ -1,6 +1,6 @@
 package io.github.orizynpx.arxwipe.ui.search
 
-import android.content.Intent
+
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -22,7 +22,6 @@ import io.github.orizynpx.arxwipe.databinding.ItemSearchHistoryBinding
 import io.github.orizynpx.arxwipe.domain.model.ArxivPaper
 import io.github.orizynpx.arxwipe.ui.dialogs.CategoryFilterSheet
 import io.github.orizynpx.arxwipe.ui.dialogs.CollectionDialogs
-
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
@@ -111,11 +110,6 @@ class SearchFragment : Fragment() {
             runSearch(binding.svPapers.text.toString())
             true
         }
-
-        
-        if (viewModel.uiState.value is SearchUiState.Idle) {
-            viewModel.search("", selectedCategoryCodes.toList())
-        }
     }
 
     private fun showFilterSheet() {
@@ -153,8 +147,9 @@ class SearchFragment : Fragment() {
                         when (state) {
                             is SearchUiState.Idle -> {
                                 binding.lpiSearch.visibility = View.GONE
-                                binding.tvNoResults.visibility = View.GONE
-                                binding.rvSearchResults.visibility = View.VISIBLE
+                                binding.tvNoResults.text = getString(R.string.search_instruction)
+                                binding.tvNoResults.visibility = View.VISIBLE
+                                binding.rvSearchResults.visibility = View.GONE
                                 adapter.submitList(emptyList())
                             }
                             is SearchUiState.Loading -> {
@@ -195,6 +190,9 @@ class SearchFragment : Fragment() {
                         historyAdapter.submitList(history)
                     }
                 }
+                launch {
+                    viewModel.collections.collect {  }
+                }
             }
         }
     }
@@ -225,14 +223,11 @@ class SearchFragment : Fragment() {
         inner class ViewHolder(private val binding: ItemSavedPaperBinding) : RecyclerView.ViewHolder(binding.root) {
 
             fun bind(paper: ArxivPaper) {
+                binding.tvPaperCategories.text = paper.allCategories.joinToString(" ") { it.categoryId }
                 binding.tvPaperTitle.text = paper.title
                 binding.tvPaperAuthors.text = paper.formattedAuthors
                 binding.ibMore.setOnClickListener { onBookmarkClick(paper) }
-                binding.cgTags.visibility = View.GONE
 
-                
-                binding.btnReadDefault.setOnClickListener { openReader(paper, "PDF") }
-                binding.btnReadDropdown.setOnClickListener { openReader(paper, "HTML") }
                 binding.root.setOnClickListener {
                     findNavController().navigate(
                         R.id.action_search_to_paperDetails,

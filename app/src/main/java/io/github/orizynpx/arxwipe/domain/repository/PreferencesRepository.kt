@@ -25,6 +25,11 @@ interface PreferencesRepository {
     fun getLastTriageDate(): Flow<String>
     suspend fun saveLastTriageDate(date: String)
 
+    fun getLastTriageConfigCategories(): Flow<Set<String>>
+    suspend fun saveLastTriageConfigCategories(categories: Set<String>)
+    fun getLastTriageConfigBatchSize(): Flow<Int>
+    suspend fun saveLastTriageConfigBatchSize(size: Int)
+
     fun isDynamicColorsEnabled(): Flow<Boolean>
     suspend fun saveDynamicColorsPreference(enabled: Boolean)
 

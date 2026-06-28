@@ -28,13 +28,21 @@ class CollectionRepositoryImpl @Inject constructor(
     init {
         CoroutineScope(Dispatchers.IO).launch {
             val collections = collectionDao.getUserCollections().first()
+            val readLaterId = "00000000-0000-0000-0000-000000000000"
             if (collections.none { it.name == "Read Later" }) {
                 collectionDao.insertCollection(
                     CollectionEntity(
-                        collectionId = "00000000-0000-0000-0000-000000000000", 
+                        collectionId = readLaterId, 
                         name = "Read Later"
                     )
                 )
+            }
+            
+            
+            firebaseAuth.currentUser?.uid?.let { userId ->
+                firestore.collection("users").document(userId)
+                    .collection("collections").document(readLaterId)
+                    .set(mapOf("name" to "Read Later"))
             }
         }
     }
@@ -95,6 +103,12 @@ class CollectionRepositoryImpl @Inject constructor(
 
     override suspend fun deleteCollection(collectionId: Uuid) {
         collectionDao.deleteCollectionById(collectionId.toString())
+
+        firebaseAuth.currentUser?.uid?.let { userId ->
+            firestore.collection("users").document(userId)
+                .collection("collections").document(collectionId.toString())
+                .delete()
+        }
     }
 
     override suspend fun addPaperToCollection(paperId: String, collectionId: Uuid) {
@@ -120,5 +134,12 @@ class CollectionRepositoryImpl @Inject constructor(
                 arxivId = paperId
             )
         )
+
+        firebaseAuth.currentUser?.uid?.let { userId ->
+            firestore.collection("users").document(userId)
+                .collection("collections").document(collectionId.toString())
+                .collection("papers").document(paperId)
+                .delete()
+        }
     }
 }

@@ -1,7 +1,11 @@
 package io.github.orizynpx.arxwipe.data.local.entity
 
 import io.github.orizynpx.arxwipe.R
-import io.github.orizynpx.arxwipe.domain.model.*
+import io.github.orizynpx.arxwipe.domain.model.ArxivPaper
+import io.github.orizynpx.arxwipe.domain.model.ArxivTaxonomy
+import io.github.orizynpx.arxwipe.domain.model.MainField
+import io.github.orizynpx.arxwipe.domain.model.PaperAuthor
+import io.github.orizynpx.arxwipe.domain.model.PaperCategory
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
@@ -26,7 +30,7 @@ fun PaperWithAuthors.toDomain(): ArxivPaper {
             },
         abstractUrl = paper.abstractUrl,
         pdfUrl = paper.pdfUrl,
-        htmlUrl = paper.htmlUrl,
+        htmlUrl = paper.htmlUrl?.replace("/abs/", "/html/"),
         publishedAt = paper.publishedAt,
         updatedAt = paper.updatedAt,
         comment = paper.comment

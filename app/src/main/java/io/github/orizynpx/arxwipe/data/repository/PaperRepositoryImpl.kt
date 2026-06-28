@@ -8,16 +8,20 @@ import io.github.orizynpx.arxwipe.data.local.entity.toEntity
 import io.github.orizynpx.arxwipe.data.remote.ArxivApiService
 import io.github.orizynpx.arxwipe.data.remote.dto.ArxivFeedDto
 import io.github.orizynpx.arxwipe.data.remote.dto.toDomain
-import io.github.orizynpx.arxwipe.domain.model.*
+import io.github.orizynpx.arxwipe.domain.model.ArxivPaper
+import io.github.orizynpx.arxwipe.domain.model.ArxivTaxonomy
+import io.github.orizynpx.arxwipe.domain.model.PaperCategory
 import io.github.orizynpx.arxwipe.domain.repository.PaperRepository
 import io.github.orizynpx.arxwipe.domain.repository.PreferencesRepository
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.serialization.decodeFromString
 import nl.adaptivity.xmlutil.serialization.XML
 import timber.log.Timber
+import java.io.IOException
 import javax.inject.Inject
 import kotlin.uuid.ExperimentalUuidApi
 
@@ -43,12 +47,14 @@ class PaperRepositoryImpl @Inject constructor(
                 if (it.endsWith("*")) "cat:${it.replace("*", "")}*" else "cat:$it"
             } ?: "all"
             try {
-                val responseBody = apiService.getPapers(
-                    searchQuery = searchQuery,
-                    maxResults = 100,
-                    sortBy = "submittedDate",
-                    sortOrder = "descending"
-                )
+                val responseBody = withRetry {
+                    apiService.getPapers(
+                        searchQuery = searchQuery,
+                        maxResults = 100,
+                        sortBy = "submittedDate",
+                        sortOrder = "descending"
+                    )
+                }
                 val xmlString = responseBody.string()
                 val feed = xml.decodeFromString<ArxivFeedDto>(xmlString)
                 val papers = feed.entries.map { it.toDomain() }
@@ -80,13 +86,15 @@ class PaperRepositoryImpl @Inject constructor(
         var start = 0
         try {
             while (accumulated.size < targetCount && start < MAX_PAGINATION_RESULTS) {
-                val responseBody = apiService.getPapers(
-                    searchQuery = searchQuery,
-                    maxResults = PAGE_SIZE,
-                    start = start,
-                    sortBy = "submittedDate",
-                    sortOrder = "descending"
-                )
+                val responseBody = withRetry {
+                    apiService.getPapers(
+                        searchQuery = searchQuery,
+                        maxResults = PAGE_SIZE,
+                        start = start,
+                        sortBy = "submittedDate",
+                        sortOrder = "descending"
+                    )
+                }
                 val xmlString = responseBody.string()
                 val feed = xml.decodeFromString<ArxivFeedDto>(xmlString)
                 val papers = feed.entries.map { it.toDomain() }
@@ -151,20 +159,22 @@ class PaperRepositoryImpl @Inject constructor(
             .takeIf { it.isNotEmpty() }
             ?.joinToString(separator = " OR ") { "cat:$it" }
             ?.let { "($it)" }
-        val termClause = trimmedQuery.takeIf { it.isNotEmpty() }?.let { "all:$it" }
+        val termClause = trimmedQuery.takeIf { it.isNotEmpty() }?.let { "ti:$it" }
         
         val searchQuery = listOfNotNull(catClause, termClause)
             .joinToString(separator = " AND ")
             .ifBlank { "all" }
 
-        val responseBody = apiService.getPapers(
-            searchQuery = searchQuery,
-            maxResults = SEARCH_PAGE_SIZE,
-            start = start,
-            
-            sortBy = "lastUpdatedDate",
-            sortOrder = "descending"
-        )
+        val responseBody = withRetry {
+            apiService.getPapers(
+                searchQuery = searchQuery,
+                maxResults = SEARCH_PAGE_SIZE,
+                start = start,
+                
+                sortBy = "lastUpdatedDate",
+                sortOrder = "descending"
+            )
+        }
         val xmlString = responseBody.string()
         val feed = xml.decodeFromString<ArxivFeedDto>(xmlString)
         val papers = feed.entries.map { it.toDomain() }
@@ -181,6 +191,47 @@ class PaperRepositoryImpl @Inject constructor(
 
     override suspend fun saveOnboardingPreferences(selectedCategoryIds: List<String>, batchSize: Int) {
         preferencesRepository.saveOnboardingPreferences(selectedCategoryIds, batchSize)
+    }
+
+    override suspend fun fetchAndSavePaper(paperId: String): ArxivPaper? {
+        return try {
+            val responseBody = withRetry {
+                apiService.getPapers(
+                    searchQuery = "id:$paperId",
+                    maxResults = 1,
+                    sortBy = "submittedDate",
+                    sortOrder = "descending"
+                )
+            }
+            val xmlString = responseBody.string()
+            val feed = xml.decodeFromString<ArxivFeedDto>(xmlString)
+            val paper = feed.entries.firstOrNull()?.toDomain()
+            paper?.let { cachePapers(listOf(it)) }
+            paper
+        } catch (e: Exception) {
+            Timber.e(e, "Failed to fetch and save paper: $paperId")
+            null
+        }
+    }
+
+    private suspend fun <T> withRetry(
+        times: Int = 3,
+        initialDelay: Long = 1000,
+        maxDelay: Long = 5000,
+        factor: Double = 2.0,
+        block: suspend () -> T
+    ): T {
+        var currentDelay = initialDelay
+        repeat(times - 1) { attempt ->
+            try {
+                return block()
+            } catch (e: IOException) {
+                Timber.w(e, "Retryable error occurred on attempt ${attempt + 1}. Retrying in ${currentDelay}ms...")
+            }
+            delay(currentDelay)
+            currentDelay = (currentDelay * factor).toLong().coerceAtMost(maxDelay)
+        }
+        return block() 
     }
 
     private companion object {

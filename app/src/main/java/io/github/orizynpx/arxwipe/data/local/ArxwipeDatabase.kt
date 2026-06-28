@@ -9,7 +9,15 @@ import io.github.orizynpx.arxwipe.data.local.dao.InteractionDao
 import io.github.orizynpx.arxwipe.data.local.dao.NotificationDao
 import io.github.orizynpx.arxwipe.data.local.dao.PaperDao
 import io.github.orizynpx.arxwipe.data.local.dao.SearchHistoryDao
-import io.github.orizynpx.arxwipe.data.local.entity.*
+import io.github.orizynpx.arxwipe.data.local.entity.AuthorEntity
+import io.github.orizynpx.arxwipe.data.local.entity.CollectionEntity
+import io.github.orizynpx.arxwipe.data.local.entity.CollectionPaperCrossRef
+import io.github.orizynpx.arxwipe.data.local.entity.NotificationEntity
+import io.github.orizynpx.arxwipe.data.local.entity.PaperAuthorCrossRef
+import io.github.orizynpx.arxwipe.data.local.entity.PaperEntity
+import io.github.orizynpx.arxwipe.data.local.entity.SearchHistoryEntity
+import io.github.orizynpx.arxwipe.data.local.entity.SwipeInteractionEntity
+import io.github.orizynpx.arxwipe.data.local.entity.TriagePaperCrossRef
 
 @Database(
     entities = [

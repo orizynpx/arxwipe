@@ -48,6 +48,7 @@ class SwipePaperUseCaseTest {
 
         
         coVerify(exactly = 1) { interactionRepository.recordSwipe(paperId, SwipeType.SAVE) }
+        coVerify(exactly = 1) { collectionRepository.getUserCollections() }
         coVerify(exactly = 1) { collectionRepository.addPaperToCollection(paperId, collectionId) }
         confirmVerified(interactionRepository, collectionRepository)
     }

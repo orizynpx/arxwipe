@@ -10,25 +10,19 @@ import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.core.stringSetPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.FirebaseFirestore
 import dagger.hilt.android.qualifiers.ApplicationContext
 import io.github.orizynpx.arxwipe.domain.model.OnboardingPrefs
 import io.github.orizynpx.arxwipe.domain.repository.PreferencesRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.tasks.await
 import timber.log.Timber
 import javax.inject.Inject
 
 private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "user_preferences")
 
 class UserPreferencesRepository @Inject constructor(
-    @ApplicationContext private val context: Context,
-    private val firebaseAuth: FirebaseAuth,
-    private val firestore: FirebaseFirestore
+    @ApplicationContext private val context: Context
 ) : PreferencesRepository {
 
     private object PreferencesKeys {
@@ -38,13 +32,19 @@ class UserPreferencesRepository @Inject constructor(
         val LAST_FETCH_TIME = longPreferencesKey("last_fetch_time")
         val LAST_FETCH_DATE = stringPreferencesKey("last_fetch_date")
         val LAST_TRIAGE_DATE = stringPreferencesKey("last_triage_date")
+        val LAST_TRIAGE_CONFIG_CATEGORIES = stringSetPreferencesKey("last_triage_config_categories")
+        val LAST_TRIAGE_CONFIG_BATCH_SIZE = intPreferencesKey("last_triage_config_batch_size")
         val CURRENT_TRIAGE_INDEX = intPreferencesKey("current_triage_index")
         val DYNAMIC_COLORS = booleanPreferencesKey("dynamic_colors")
     }
 
     override fun isOnboardingComplete(): Flow<Boolean> = context.dataStore.data
         .map { preferences ->
-            preferences[PreferencesKeys.ONBOARDING_COMPLETE] ?: false
+            val isComplete = preferences[PreferencesKeys.ONBOARDING_COMPLETE] ?: false
+            val hasCategories = (preferences[PreferencesKeys.SELECTED_CATEGORIES] ?: emptySet()).isNotEmpty()
+            
+            
+            isComplete || hasCategories
         }
 
     override fun getSelectedCategories(): Flow<Set<String>> = context.dataStore.data
@@ -124,6 +124,30 @@ class UserPreferencesRepository @Inject constructor(
         }
     }
 
+    override fun getLastTriageConfigCategories(): Flow<Set<String>> = context.dataStore.data
+        .map { preferences ->
+            preferences[PreferencesKeys.LAST_TRIAGE_CONFIG_CATEGORIES] ?: emptySet()
+        }
+
+    override suspend fun saveLastTriageConfigCategories(categories: Set<String>) {
+        Timber.d("Saving last triage config categories: $categories")
+        context.dataStore.edit { preferences ->
+            preferences[PreferencesKeys.LAST_TRIAGE_CONFIG_CATEGORIES] = categories
+        }
+    }
+
+    override fun getLastTriageConfigBatchSize(): Flow<Int> = context.dataStore.data
+        .map { preferences ->
+            preferences[PreferencesKeys.LAST_TRIAGE_CONFIG_BATCH_SIZE] ?: 0
+        }
+
+    override suspend fun saveLastTriageConfigBatchSize(size: Int) {
+        Timber.d("Saving last triage config batch size: $size")
+        context.dataStore.edit { preferences ->
+            preferences[PreferencesKeys.LAST_TRIAGE_CONFIG_BATCH_SIZE] = size
+        }
+    }
+
     override suspend fun saveTriageIndex(index: Int) {
         Timber.d("Saving triage index: $index")
         context.dataStore.edit { preferences ->
@@ -151,39 +175,10 @@ class UserPreferencesRepository @Inject constructor(
         saveCategoryPreferences(categoryIds.toSet())
         saveBatchSize(batchSize)
         setOnboardingComplete(true)
-
-        
-        firebaseAuth.currentUser?.uid?.let { userId ->
-            val data = mapOf(
-                "selectedCategories" to categoryIds,
-                "batchSize" to batchSize,
-                "onboardingComplete" to true
-            )
-            firestore.collection("users").document(userId)
-                .set(data, com.google.firebase.firestore.SetOptions.merge())
-                .addOnFailureListener { e -> Timber.e(e, "Failed to sync preferences to Firestore") }
-        }
     }
 
     override suspend fun syncWithRemote() {
-        val userId = firebaseAuth.currentUser?.uid ?: return
-        try {
-            val document = firestore.collection("users").document(userId).get().await()
-            if (document.exists()) {
-                val categories = document.get("selectedCategories") as? List<String>
-                val batchSize = (document.getLong("batchSize"))?.toInt()
-                val onboardingComplete = document.getBoolean("onboardingComplete") ?: false
-
-                if (onboardingComplete) {
-                    categories?.let { saveCategoryPreferences(it.toSet()) }
-                    batchSize?.let { saveBatchSize(it) }
-                    setOnboardingComplete(true)
-                    Timber.d("Preferences synced from remote")
-                }
-            }
-        } catch (e: Exception) {
-            Timber.e(e, "Error syncing preferences from remote")
-        }
+        
     }
 
     override suspend fun clearPreferences() {

@@ -1,12 +1,12 @@
 package io.github.orizynpx.arxwipe.ui.discover
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
-import android.content.Context
 import io.github.orizynpx.arxwipe.domain.model.ArxivPaper
 import io.github.orizynpx.arxwipe.domain.model.SwipeType
 import io.github.orizynpx.arxwipe.domain.repository.CollectionRepository
@@ -16,8 +16,17 @@ import io.github.orizynpx.arxwipe.domain.usecase.CompileNewTriageUseCase
 import io.github.orizynpx.arxwipe.domain.usecase.SwipePaperUseCase
 import io.github.orizynpx.arxwipe.domain.usecase.UndoSwipeUseCase
 import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import timber.log.Timber
 import javax.inject.Inject
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
@@ -27,14 +36,15 @@ sealed interface DiscoverUiState {
     data class Success(
         val papers: List<ArxivPaper>,
         val currentIndex: Int,
-        val progressPercentage: Int,
-        val isFallback: Boolean = false
+        val progressPercentage: Int
     ) : DiscoverUiState
     data class Error(val message: String, val type: ErrorType = ErrorType.GENERAL) : DiscoverUiState
     data object Exhausted : DiscoverUiState
 
     enum class ErrorType {
         NETWORK,
+        TIMEOUT,
+        RATE_LIMIT,
         EMPTY_RESULT,
         NO_PAPERS_AVAILABLE,
         GENERAL
@@ -68,24 +78,29 @@ class DiscoverViewModel @Inject constructor(
     val uiState: StateFlow<DiscoverUiState> = combine(
         paperRepository.getActiveTriagePapers(),
         preferencesRepository.getCurrentTriageIndex(),
-        preferencesRepository.getOnboardingPreferences(),
         _error,
         _isCompiling,
         isWorkRunning
     ) { flowArray ->
         val papers = flowArray[0] as List<ArxivPaper>
         val index = flowArray[1] as Int
-        val prefs = flowArray[2] as io.github.orizynpx.arxwipe.domain.model.OnboardingPrefs
-        val error = flowArray[3] as String?
-        val compiling = flowArray[4] as Boolean
-        val backgroundRunning = flowArray[5] as Boolean
+        val error = flowArray[2] as String?
+        val compiling = flowArray[3] as Boolean
+        val backgroundRunning = flowArray[4] as Boolean
 
-        val isLoading = compiling || backgroundRunning
+        val isLoading = (compiling || backgroundRunning) && papers.isEmpty()
         
         when {
             
+            papers.isNotEmpty() && index < papers.size -> {
+                val progress = ((index.toFloat() / papers.size) * 100).toInt()
+                DiscoverUiState.Success(papers, index, progress)
+            }
+            
             error != null && papers.isEmpty() -> {
                 val type = when {
+                    error.contains("timeout", ignoreCase = true) -> DiscoverUiState.ErrorType.TIMEOUT
+                    error.contains("429") || error.contains("rate limit", ignoreCase = true) -> DiscoverUiState.ErrorType.RATE_LIMIT
                     error.contains("network", ignoreCase = true) || error.contains("host", ignoreCase = true) -> DiscoverUiState.ErrorType.NETWORK
                     error.contains("no new papers", ignoreCase = true) -> DiscoverUiState.ErrorType.EMPTY_RESULT
                     else -> DiscoverUiState.ErrorType.GENERAL
@@ -93,27 +108,9 @@ class DiscoverViewModel @Inject constructor(
                 DiscoverUiState.Error(error, type)
             }
             
-            papers.isNotEmpty() && index < papers.size -> {
-                val progress = ((index.toFloat() / papers.size) * 100).toInt()
-                
-                
-                
-                val selectedIds = prefs.selectedCategoryIds
-                val isFallback = if (selectedIds.isEmpty()) false else {
-                    papers.none { paper ->
-                        selectedIds.any { selectedId ->
-                            val prefix = selectedId.removeSuffix(".*")
-                            paper.allCategories.any { it.categoryId.startsWith(prefix) }
-                        }
-                    }
-                }
-
-                DiscoverUiState.Success(papers, index, progress, isFallback)
-            }
-            
             isLoading -> DiscoverUiState.Loading
             
-            papers.isEmpty() -> {
+            papers.isEmpty() && !isLoading -> {
                 
                 
                 if (error != null) {
@@ -138,17 +135,34 @@ class DiscoverViewModel @Inject constructor(
         
         
         viewModelScope.launch {
+            _isCompiling.value = true
             try {
                 compileNewTriageUseCase(force = false)
             } catch (e: Exception) {
                 _error.value = e.message
+            } finally {
+                _isCompiling.value = false
             }
+        }
+
+        
+        viewModelScope.launch {
+            preferencesRepository.getOnboardingPreferences()
+                .distinctUntilChanged()
+                .collect {
+                    Timber.d("Preferences changed, refreshing triage")
+                    refreshTriage(force = false)
+                }
         }
     }
 
     
     fun refreshTriage(force: Boolean) {
         viewModelScope.launch {
+            if (_isCompiling.value) {
+                Timber.d("Compilation already in progress, skipping refresh.")
+                return@launch
+            }
             _error.value = null
             _isCompiling.value = true
             try {
@@ -167,6 +181,16 @@ class DiscoverViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 swipePaperUseCase(paperId, type)
+                
+                
+                val papers = paperRepository.getActiveTriagePapers().first()
+                val currentIndex = preferencesRepository.getCurrentTriageIndex().first()
+                
+                
+                if (currentIndex >= papers.size - 3) {
+                    Timber.d("Near end of triage (index $currentIndex of ${papers.size}). Triggering compilation.")
+                    refreshTriage(force = false)
+                }
             } catch (e: Exception) {
                 _error.value = e.message ?: "Failed to record swipe"
             }

@@ -2,10 +2,10 @@ package io.github.orizynpx.arxwipe.data.remote.dto
 
 import io.github.orizynpx.arxwipe.R
 import io.github.orizynpx.arxwipe.domain.model.ArxivPaper
+import io.github.orizynpx.arxwipe.domain.model.ArxivTaxonomy
+import io.github.orizynpx.arxwipe.domain.model.MainField
 import io.github.orizynpx.arxwipe.domain.model.PaperAuthor
 import io.github.orizynpx.arxwipe.domain.model.PaperCategory
-import io.github.orizynpx.arxwipe.domain.model.MainField
-import io.github.orizynpx.arxwipe.domain.model.ArxivTaxonomy
 import kotlinx.serialization.Serializable
 import nl.adaptivity.xmlutil.serialization.XmlElement
 import nl.adaptivity.xmlutil.serialization.XmlSerialName
@@ -68,7 +68,8 @@ data class ArxivCategoryDto(
 data class ArxivLinkDto(
     @XmlElement(false) val href: String,
     @XmlElement(false) val rel: String? = null,
-    @XmlElement(false) val title: String? = null
+    @XmlElement(false) val title: String? = null,
+    @XmlElement(false) val type: String? = null
 )
 
 @OptIn(ExperimentalUuidApi::class)
@@ -80,7 +81,7 @@ fun ArxivEntryDto.toDomain(): ArxivPaper {
     val arxivId = id.substringAfterLast("/")
 
     val pdfUrl = links.find { it.title == "pdf" }?.href
-    val htmlUrl = links.find { it.rel == "related" }?.href
+    val htmlUrl = links.find { it.rel == "related" || it.type == "text/html" }?.href?.replace("/abs/", "/html/")
 
     val domainAuthors = authors.map { author ->
         

@@ -1,6 +1,5 @@
-package io.github.orizynpx.arxwipe
+package io.github.orizynpx.arxwipe.ui.discover
 
-import android.content.Intent
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat
@@ -9,6 +8,7 @@ import androidx.navigation.findNavController
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.chip.Chip
+import io.github.orizynpx.arxwipe.R
 import io.github.orizynpx.arxwipe.databinding.ItemCardBinding
 import io.github.orizynpx.arxwipe.domain.model.ArxivPaper
 
@@ -47,7 +47,7 @@ class PaperAdapter(private var papers: List<ArxivPaper> = emptyList()) : Recycle
                 }
             }
             binding.paperAbstract.text = paper.summary
-            
+
             binding.chipGroup.removeAllViews()
             val context = binding.root.context
 

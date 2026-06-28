@@ -56,6 +56,7 @@ class UndoSwipeUseCaseTest {
 
         
         coVerify(exactly = 1) { interactionRepository.undoLastSwipe() }
+        coVerify(exactly = 1) { collectionRepository.getUserCollections() }
         coVerify(exactly = 1) { collectionRepository.removePaperFromCollection(paperId, collectionId) }
         confirmVerified(interactionRepository, collectionRepository)
     }

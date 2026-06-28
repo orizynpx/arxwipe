@@ -5,13 +5,21 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent" >
 
-    <androidx.appcompat.widget.Toolbar
-        android:id="@+id/tb_reader"
+    <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/abl_reader"
         android:layout_width="match_parent"
-        android:layout_height="?attr/actionBarSize"
-        android:background="?attr/colorPrimary"
-        app:layout_constraintTop_toTopOf="parent"
-        app:titleTextColor="@android:color/white" />
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/tb_reader"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            app:navigationIcon="@drawable/arrow_back_24dp_e3e3e3_fill0_wght400_grad0_opsz24"
+            app:title="Reading View"
+            app:titleTextColor="@android:color/white" />
+
+    </com.google.android.material.appbar.AppBarLayout>
 
     <android.webkit.WebView
         android:id="@+id/wv_reader"
@@ -19,7 +27,7 @@
         android:layout_height="0dp"
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tb_reader" />
+        app:layout_constraintTop_toBottomOf="@id/abl_reader" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rv_pdf_pages"
@@ -30,7 +38,7 @@
         android:paddingVertical="8dp"
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tb_reader" />
+        app:layout_constraintTop_toBottomOf="@id/abl_reader" />
 
     <ProgressBar
         android:id="@+id/pb_loading"
@@ -40,7 +48,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tb_reader" />
+        app:layout_constraintTop_toBottomOf="@id/abl_reader" />
 
     <TextView
         android:id="@+id/tv_error"
@@ -51,6 +59,6 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tb_reader" />
+        app:layout_constraintTop_toBottomOf="@id/abl_reader" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

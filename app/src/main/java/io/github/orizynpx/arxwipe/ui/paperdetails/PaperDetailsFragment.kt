@@ -1,6 +1,6 @@
 package io.github.orizynpx.arxwipe.ui.paperdetails
 
-import android.content.Intent
+
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -19,7 +19,6 @@ import io.github.orizynpx.arxwipe.R
 import io.github.orizynpx.arxwipe.databinding.FragmentPaperDetailsBinding
 import io.github.orizynpx.arxwipe.domain.model.ArxivPaper
 import io.github.orizynpx.arxwipe.ui.dialogs.CollectionDialogs
-
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
@@ -94,22 +93,23 @@ class PaperDetailsFragment : Fragment() {
         binding.cgCategories.removeAllViews()
         paper.allCategories.forEach { category ->
             val chip = Chip(requireContext())
-            chip.text = getString(category.displayNameRes)
+            chip.text = category.categoryId
             binding.cgCategories.addView(chip)
         }
 
-        binding.btnReadPdf.isVisible = paper.hasPdf
+        binding.btnReadPdf.isEnabled = paper.hasPdf
         binding.btnReadPdf.setOnClickListener {
             openReader(paper.arxivId, "PDF")
         }
 
-        binding.btnReadHtml.isVisible = paper.hasHtml
+        binding.btnReadHtml.isEnabled = paper.hasHtml
         binding.btnReadHtml.setOnClickListener {
             openReader(paper.arxivId, "HTML")
         }
 
-        binding.btnSave.isVisible = !isSaved
+        binding.btnSave.isEnabled = !isSaved
         binding.btnSave.setOnClickListener {
+            binding.btnSave.isEnabled = false
             viewModel.saveToReadLater(paper.arxivId)
             showMoveSnackbar(paper.arxivId, collections)
         }
@@ -118,12 +118,14 @@ class PaperDetailsFragment : Fragment() {
     private fun showMoveSnackbar(paperId: String, collections: List<io.github.orizynpx.arxwipe.domain.model.PaperCollection>) {
         val snackbar = Snackbar.make(binding.root, R.string.added_to_read_later, Snackbar.LENGTH_LONG)
         snackbar.setAction(R.string.move_action) {
-            CollectionDialogs.showMultiChoiceCollectionDialog(
-                requireContext(),
-                paperId,
-                collections
-            ) { collectionId, isChecked ->
-                viewModel.updatePaperCollection(paperId, collectionId, isChecked)
+            if (isAdded) {
+                CollectionDialogs.showMultiChoiceCollectionDialog(
+                    requireContext(),
+                    paperId,
+                    collections
+                ) { collectionId, isChecked ->
+                    viewModel.updatePaperCollection(paperId, collectionId, isChecked)
+                }
             }
         }
         snackbar.show()

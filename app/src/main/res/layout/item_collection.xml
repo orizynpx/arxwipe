@@ -12,12 +12,22 @@
         android:layout_height="wrap_content"
         android:padding="16dp">
 
+        <CheckBox
+            android:id="@+id/cb_collection"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
         <ImageView
             android:id="@+id/iv_collection_icon"
             android:layout_width="40dp"
             android:layout_height="40dp"
+            android:layout_marginStart="8dp"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/cb_collection"
             app:layout_constraintTop_toTopOf="parent"
             app:srcCompat="@android:drawable/ic_menu_agenda"
             app:tint="?attr/colorPrimary" />
@@ -50,7 +60,7 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:srcCompat="@android:drawable/ic_menu_more"
+            app:srcCompat="@drawable/more_vert_24dp_e3e3e3_fill0_wght400_grad0_opsz24"
             app:tint="?attr/colorOnSurfaceVariant" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>

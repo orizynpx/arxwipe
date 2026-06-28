@@ -11,11 +11,6 @@
         android:label="Launch"
         tools:layout="@layout/fragment_launch">
         <action
-            android:id="@+id/action_launchFragment_to_loginFragment"
-            app:destination="@id/loginFragment"
-            app:popUpTo="@id/launchFragment"
-            app:popUpToInclusive="true" />
-        <action
             android:id="@+id/action_launchFragment_to_onboardingFragment"
             app:destination="@id/onboardingFragment"
             app:popUpTo="@id/launchFragment"
@@ -107,7 +102,9 @@
             android:id="@+id/receivedNotificationsFragment"
             android:name="io.github.orizynpx.arxwipe.ui.notifications.ReceivedNotificationsFragment"
             android:label="Notifications"
-            tools:layout="@layout/fragment_received_notifications" />
+            tools:layout="@layout/fragment_received_notifications">
+            <deepLink app:uri="arxwipe://notifications" />
+        </fragment>
 
         <fragment
             android:id="@+id/discoverPaperDetailsFragment"

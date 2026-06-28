@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
@@ -20,6 +21,7 @@ import io.github.orizynpx.arxwipe.databinding.FragmentLoginBinding
 import io.github.orizynpx.arxwipe.domain.repository.PreferencesRepository
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import timber.log.Timber
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -27,7 +29,7 @@ class LoginFragment : Fragment() {
 
     private var _binding: FragmentLoginBinding? = null
     private val binding get() = _binding!!
-    private val viewModel: AuthViewModel by viewModels()
+    private val viewModel: AuthViewModel by activityViewModels()
 
     @Inject
     lateinit var preferencesRepository: PreferencesRepository
@@ -74,11 +76,22 @@ class LoginFragment : Fragment() {
                         }
                         is AuthState.Authenticated -> {
                             binding.progressBar.isVisible = false
-                            val prefs = preferencesRepository.getOnboardingPreferences().first()
-                            if (prefs.selectedCategoryIds.isNotEmpty()) {
-                                syncManager.startRealTimeSync()
-                                findNavController().navigate(R.id.action_loginFragment_to_navigation_discover)
+                            syncManager.startRealTimeSync()
+                            
+                            
+                            val isDone = preferencesRepository.isOnboardingComplete().first()
+                            Timber.d("Authenticated. Onboarding done: $isDone")
+                            if (isDone) {
+                                
+                                
+                                if (!findNavController().popBackStack(R.id.profileFragment, false)) {
+                                    Timber.d("Pop back to Profile failed. Navigating to Discover.")
+                                    findNavController().navigate(R.id.action_loginFragment_to_navigation_discover)
+                                } else {
+                                    Timber.d("Popped back to Profile.")
+                                }
                             } else {
+                                Timber.d("Onboarding NOT done. Navigating to Onboarding.")
                                 findNavController().navigate(R.id.action_loginFragment_to_onboardingFragment)
                             }
                         }

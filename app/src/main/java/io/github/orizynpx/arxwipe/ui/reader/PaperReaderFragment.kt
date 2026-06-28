@@ -59,6 +59,8 @@ class PaperReaderFragment : Fragment() {
             findNavController().popBackStack()
         }
 
+        binding.tbReader.title = getString(R.string.reading_view)
+
         val arxivId = arguments?.getString("arxiv_id")
         val readerMode = arguments?.getString("reader_mode")
 
@@ -74,7 +76,7 @@ class PaperReaderFragment : Fragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             val paper = repository.getPaperById(arxivId)
             if (paper != null) {
-                binding.tbReader.title = paper.title
+                
                 handlePaperReading(paper, readerMode)
             } else {
                 showError(getString(R.string.error_paper_not_found))
@@ -109,6 +111,8 @@ class PaperReaderFragment : Fragment() {
         binding.wvReader.apply {
             settings.apply {
                 javaScriptEnabled = true
+                domStorageEnabled = true
+                databaseEnabled = true
                 builtInZoomControls = true
                 displayZoomControls = false
                 useWideViewPort = true

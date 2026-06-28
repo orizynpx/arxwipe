@@ -28,4 +28,6 @@ interface PaperRepository {
     fun getActiveTriagePapers(): Flow<List<ArxivPaper>>
 
     suspend fun saveOnboardingPreferences(selectedCategoryIds: List<String>, batchSize: Int)
+    
+    suspend fun fetchAndSavePaper(paperId: String): ArxivPaper?
 }

@@ -28,12 +28,4 @@ data class ArxivPaper(
 
     val formattedAuthors: String
         get() = authors.joinToString(", ") { it.name }
-
-    fun matchesQuery(query: String): Boolean {
-        if (query.isBlank()) return true
-        val lowercaseQuery = query.lowercase()
-        return title.lowercase().contains(lowercaseQuery) ||
-                summary.lowercase().contains(lowercaseQuery) ||
-                authors.any { it.name.lowercase().contains(lowercaseQuery) }
-    }
 }

@@ -4,6 +4,9 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updatePadding
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
@@ -19,6 +22,7 @@ import io.github.orizynpx.arxwipe.databinding.ItemOnboardingCheckboxBinding
 import io.github.orizynpx.arxwipe.databinding.ItemOnboardingHeaderBinding
 import io.github.orizynpx.arxwipe.domain.model.MainField
 import io.github.orizynpx.arxwipe.domain.model.PaperCategory
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -46,8 +50,23 @@ class OnboardingFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        setupInsets()
         setupUI()
         observeViewModel()
+    }
+
+    private fun setupInsets() {
+        ViewCompat.setOnApplyWindowInsetsListener(binding.root) { v, insets ->
+            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            val basePadding = (24 * resources.displayMetrics.density).toInt()
+            v.updatePadding(
+                left = basePadding + systemBars.left,
+                top = basePadding + systemBars.top,
+                right = basePadding + systemBars.right,
+                bottom = basePadding + systemBars.bottom
+            )
+            insets
+        }
     }
 
     private fun setupUI() {
@@ -67,11 +86,8 @@ class OnboardingFragment : Fragment() {
                 binding.stepFlipper.showNext()
                 updateStepUI()
             } else {
+                binding.btnNext.isEnabled = false
                 viewModel.completeOnboarding()
-                syncManager.startRealTimeSync()
-                if (findNavController().currentDestination?.id == R.id.onboardingFragment) {
-                    findNavController().navigate(R.id.action_onboardingFragment_to_navigation_discover)
-                }
             }
         }
 
@@ -111,16 +127,27 @@ class OnboardingFragment : Fragment() {
     private fun observeViewModel() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.uiState.collect { state ->
-                    mainFieldAdapter.submitData(MainField.entries, state.selectedMajorFields)
-                    nestedCategoryAdapter.submitData(
-                        state.selectedMajorFields.toList(),
-                        state.availableCategories,
-                        state.selectedCategoryIds
-                    )
-                    binding.batchSizeValue.text = getString(R.string.batch_size_format, state.batchSize)
-                    if (binding.batchSizeSlider.value != state.batchSize.toFloat()) {
-                        binding.batchSizeSlider.value = state.batchSize.toFloat()
+                launch {
+                    viewModel.uiState.collect { state ->
+                        mainFieldAdapter.submitData(MainField.entries, state.selectedMajorFields)
+                        nestedCategoryAdapter.submitData(
+                            state.selectedMajorFields.toList(),
+                            state.availableCategories,
+                            state.selectedCategoryIds
+                        )
+                        binding.batchSizeValue.text = getString(R.string.batch_size_format, state.batchSize)
+                        if (binding.batchSizeSlider.value != state.batchSize.toFloat()) {
+                            binding.batchSizeSlider.value = state.batchSize.toFloat()
+                        }
+                    }
+                }
+
+                launch {
+                    viewModel.onboardingCompleteEvent.collectLatest {
+                        syncManager.startRealTimeSync()
+                        if (findNavController().currentDestination?.id == R.id.onboardingFragment) {
+                            findNavController().navigate(R.id.action_onboardingFragment_to_navigation_discover)
+                        }
                     }
                 }
             }

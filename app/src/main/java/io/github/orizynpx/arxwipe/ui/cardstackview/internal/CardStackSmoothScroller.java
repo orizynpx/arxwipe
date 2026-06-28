@@ -2,12 +2,12 @@ package io.github.orizynpx.arxwipe.ui.cardstackview.internal;
 
 import android.view.View;
 
+import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.RecyclerView;
+
 import io.github.orizynpx.arxwipe.ui.cardstackview.CardStackLayoutManager;
 import io.github.orizynpx.arxwipe.ui.cardstackview.CardStackListener;
 import io.github.orizynpx.arxwipe.ui.cardstackview.RewindAnimationSetting;
-
-import androidx.annotation.NonNull;
-import androidx.recyclerview.widget.RecyclerView;
 
 public class CardStackSmoothScroller extends RecyclerView.SmoothScroller {
 

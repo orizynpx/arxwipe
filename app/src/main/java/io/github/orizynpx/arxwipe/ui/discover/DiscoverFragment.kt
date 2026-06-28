@@ -11,18 +11,25 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
-import com.google.android.material.snackbar.Snackbar
 import androidx.work.ExistingWorkPolicy
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import androidx.work.workDataOf
+import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
-import io.github.orizynpx.arxwipe.PaperAdapter
+import io.github.orizynpx.arxwipe.ui.discover.PaperAdapter
 import io.github.orizynpx.arxwipe.R
 import io.github.orizynpx.arxwipe.databinding.FragmentDiscoverBinding
 import io.github.orizynpx.arxwipe.domain.model.SwipeType
-import io.github.orizynpx.arxwipe.ui.cardstackview.*
+import io.github.orizynpx.arxwipe.ui.cardstackview.CardStackLayoutManager
+import io.github.orizynpx.arxwipe.ui.cardstackview.CardStackListener
+import io.github.orizynpx.arxwipe.ui.cardstackview.Direction
+import io.github.orizynpx.arxwipe.ui.cardstackview.Duration
+import io.github.orizynpx.arxwipe.ui.cardstackview.RewindAnimationSetting
+import io.github.orizynpx.arxwipe.ui.cardstackview.StackFrom
+import io.github.orizynpx.arxwipe.ui.cardstackview.SwipeAnimationSetting
+import io.github.orizynpx.arxwipe.ui.cardstackview.SwipeableMethod
 import io.github.orizynpx.arxwipe.ui.dialogs.CollectionDialogs
 import io.github.orizynpx.arxwipe.work.TriageSyncWorker
 import kotlinx.coroutines.flow.first
@@ -78,8 +85,13 @@ class DiscoverFragment : Fragment(), CardStackListener {
     private fun observeViewModel() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.uiState.collect { state ->
-                    updateUiState(state)
+                launch {
+                    viewModel.uiState.collect { state ->
+                        updateUiState(state)
+                    }
+                }
+                launch {
+                    viewModel.collectionsFlow.collect {  }
                 }
             }
         }
@@ -113,13 +125,9 @@ class DiscoverFragment : Fragment(), CardStackListener {
                     isCardStackInitialized = true
                 }
                 
-                updateProgressUI(state.currentIndex, state.papers.size, state.progressPercentage, state.isFallback)
+                updateProgressUI(state.currentIndex, state.papers.size, state.progressPercentage)
 
-                if (state.isFallback) {
-                    binding.llHeader.setBackgroundResource(R.drawable.bg_fallback_warning)
-                } else {
-                    binding.llHeader.background = null
-                }
+                binding.llHeader.background = null
             }
             is DiscoverUiState.Exhausted -> {
                 isCardStackInitialized = false
@@ -129,6 +137,8 @@ class DiscoverFragment : Fragment(), CardStackListener {
                 setViewsVisibility(exhausted = true)
                 val errorMessage = when (state.type) {
                     DiscoverUiState.ErrorType.NETWORK -> getString(R.string.error_network)
+                    DiscoverUiState.ErrorType.TIMEOUT -> getString(R.string.error_timeout)
+                    DiscoverUiState.ErrorType.RATE_LIMIT -> getString(R.string.error_rate_limit)
                     DiscoverUiState.ErrorType.EMPTY_RESULT -> getString(R.string.error_empty_result)
                     DiscoverUiState.ErrorType.NO_PAPERS_AVAILABLE -> getString(R.string.error_no_papers_available)
                     DiscoverUiState.ErrorType.GENERAL -> state.message
@@ -163,13 +173,9 @@ class DiscoverFragment : Fragment(), CardStackListener {
         }
     }
 
-    private fun updateProgressUI(current: Int, total: Int, percentage: Int, isFallback: Boolean = false) {
+    private fun updateProgressUI(current: Int, total: Int, percentage: Int) {
         val displayCurrent = (current + 1).coerceAtMost(total)
-        val text = if (isFallback) {
-            getString(R.string.paper_progress_fallback, displayCurrent, total)
-        } else {
-            getString(R.string.paper_progress, displayCurrent, total)
-        }
+        val text = getString(R.string.paper_progress, displayCurrent, total)
         binding.tvProgress.text = text
         binding.tvPercentage.text = getString(R.string.percentage_format, percentage)
         binding.lpiProgress.progress = percentage
@@ -178,6 +184,10 @@ class DiscoverFragment : Fragment(), CardStackListener {
     private fun setupButtons() {
         binding.tbDiscover.setOnMenuItemClickListener { menuItem ->
             when (menuItem.itemId) {
+
+
+
+
                 R.id.mi_notifications -> {
                     findNavController().navigate(R.id.action_discover_to_notifications)
                     true
@@ -244,14 +254,18 @@ class DiscoverFragment : Fragment(), CardStackListener {
                     Snackbar.LENGTH_LONG
                 )
                 snackbar.setAction(R.string.move_action) {
-                    viewLifecycleOwner.lifecycleScope.launch {
-                        val collections = viewModel.collectionsFlow.first()
-                        CollectionDialogs.showMultiChoiceCollectionDialog(
-                            requireContext(),
-                            paperId,
-                            collections
-                        ) { collectionId, isChecked ->
-                            viewModel.updatePaperCollection(paperId, collectionId, isChecked)
+                    _binding?.let {
+                        viewLifecycleOwner.lifecycleScope.launch {
+                            val collections = viewModel.collectionsFlow.first()
+                            if (isAdded) {
+                                CollectionDialogs.showMultiChoiceCollectionDialog(
+                                    requireContext(),
+                                    paperId,
+                                    collections
+                                ) { collectionId, isChecked ->
+                                    viewModel.updatePaperCollection(paperId, collectionId, isChecked)
+                                }
+                            }
                         }
                     }
                 }

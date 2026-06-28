@@ -3,8 +3,8 @@ package io.github.orizynpx.arxwipe.ui.auth
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseAuth
+import kotlinx.coroutines.tasks.await
 import dagger.hilt.android.lifecycle.HiltViewModel
-import io.github.orizynpx.arxwipe.domain.repository.PreferencesRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -20,8 +20,7 @@ sealed class AuthState {
 
 @HiltViewModel
 class AuthViewModel @Inject constructor(
-    private val firebaseAuth: FirebaseAuth,
-    private val preferencesRepository: PreferencesRepository
+    private val firebaseAuth: FirebaseAuth
 ) : ViewModel() {
 
     private val _authState = MutableStateFlow<AuthState>(AuthState.Unauthenticated)
@@ -43,31 +42,24 @@ class AuthViewModel @Inject constructor(
     fun login(email: String, password: String) {
         viewModelScope.launch {
             _authState.value = AuthState.Loading
-            firebaseAuth.signInWithEmailAndPassword(email, password)
-                .addOnCompleteListener { task ->
-                    if (task.isSuccessful) {
-                        viewModelScope.launch {
-                            preferencesRepository.syncWithRemote()
-                            _authState.value = AuthState.Authenticated(firebaseAuth.currentUser?.email)
-                        }
-                    } else {
-                        _authState.value = AuthState.Error(task.exception?.message ?: "Login failed")
-                    }
-                }
+            try {
+                firebaseAuth.signInWithEmailAndPassword(email, password).await()
+                _authState.value = AuthState.Authenticated(firebaseAuth.currentUser?.email)
+            } catch (e: Exception) {
+                _authState.value = AuthState.Error(e.message ?: "Login failed")
+            }
         }
     }
 
     fun register(email: String, password: String) {
         viewModelScope.launch {
             _authState.value = AuthState.Loading
-            firebaseAuth.createUserWithEmailAndPassword(email, password)
-                .addOnCompleteListener { task ->
-                    if (task.isSuccessful) {
-                        _authState.value = AuthState.Authenticated(firebaseAuth.currentUser?.email)
-                    } else {
-                        _authState.value = AuthState.Error(task.exception?.message ?: "Registration failed")
-                    }
-                }
+            try {
+                firebaseAuth.createUserWithEmailAndPassword(email, password).await()
+                _authState.value = AuthState.Authenticated(firebaseAuth.currentUser?.email)
+            } catch (e: Exception) {
+                _authState.value = AuthState.Error(e.message ?: "Registration failed")
+            }
         }
     }
 

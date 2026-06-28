@@ -11,14 +11,14 @@ import androidx.annotation.FloatRange;
 import androidx.annotation.IntRange;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
-import io.github.orizynpx.arxwipe.R;
 
+import java.util.List;
+
+import io.github.orizynpx.arxwipe.R;
 import io.github.orizynpx.arxwipe.ui.cardstackview.internal.CardStackSetting;
 import io.github.orizynpx.arxwipe.ui.cardstackview.internal.CardStackSmoothScroller;
 import io.github.orizynpx.arxwipe.ui.cardstackview.internal.CardStackState;
 import io.github.orizynpx.arxwipe.ui.cardstackview.internal.DisplayUtil;
-
-import java.util.List;
 
 public class CardStackLayoutManager
         extends RecyclerView.LayoutManager

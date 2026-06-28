@@ -1,12 +1,13 @@
 package io.github.orizynpx.arxwipe.ui.library
 
+
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.PopupMenu
-import androidx.fragment.app.Fragment
 import androidx.core.os.bundleOf
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
@@ -20,7 +21,6 @@ import io.github.orizynpx.arxwipe.databinding.FragmentLibraryBinding
 import io.github.orizynpx.arxwipe.databinding.ItemCollectionBinding
 import io.github.orizynpx.arxwipe.domain.model.PaperCollection
 import io.github.orizynpx.arxwipe.ui.dialogs.CollectionDialogs
-
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
@@ -99,6 +99,7 @@ class LibraryFragment : Fragment() {
 
         inner class ViewHolder(private val binding: ItemCollectionBinding) : RecyclerView.ViewHolder(binding.root) {
             fun bind(collection: PaperCollection) {
+                binding.cbCollection.visibility = View.GONE
                 binding.tvCollectionName.text = collection.name
                 binding.tvPaperCount.text = getString(R.string.batch_size_format, collection.papers.size)
                 

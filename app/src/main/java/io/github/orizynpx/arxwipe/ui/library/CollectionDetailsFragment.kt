@@ -1,19 +1,17 @@
 package io.github.orizynpx.arxwipe.ui.library
 
-import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.widget.PopupMenu
-import androidx.fragment.app.Fragment
 import androidx.core.os.bundleOf
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
-import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.chip.Chip
@@ -41,7 +39,7 @@ class CollectionDetailsFragment : Fragment() {
         val idString = arguments?.getString("collection_id")
         if (idString != null) {
             try {
-                viewModel.loadCollection(Uuid.parse(idString), SortOrder.LATEST)
+                viewModel.loadCollection(Uuid.parse(idString), SortOrder.TITLE_AZ)
             } catch (e: Exception) {
                 Timber.e(e, "Invalid UUID: $idString")
             }
@@ -59,7 +57,6 @@ class CollectionDetailsFragment : Fragment() {
         }
         
         setupRecyclerView()
-        setupSortChips()
         observeViewModel()
         
         return binding.root
@@ -69,15 +66,6 @@ class CollectionDetailsFragment : Fragment() {
         binding.rvPapers.layoutManager = LinearLayoutManager(requireContext())
         adapter = SavedPaperAdapter()
         binding.rvPapers.adapter = adapter
-    }
-
-    private fun setupSortChips() {
-        binding.cgSort.setOnCheckedStateChangeListener { _, checkedIds ->
-            when (checkedIds.firstOrNull()) {
-                R.id.cp_sort_latest -> viewModel.loadCollection(viewModel.collectionId ?: return@setOnCheckedStateChangeListener, SortOrder.LATEST)
-                R.id.cp_sort_title -> viewModel.loadCollection(viewModel.collectionId ?: return@setOnCheckedStateChangeListener, SortOrder.TITLE_AZ)
-            }
-        }
     }
 
     private fun observeViewModel() {
@@ -92,6 +80,9 @@ class CollectionDetailsFragment : Fragment() {
                     viewModel.collectionName.collect { name ->
                         binding.tbCollectionDetails.title = name
                     }
+                }
+                launch {
+                    viewModel.collections.collect {  }
                 }
             }
         }
@@ -121,6 +112,7 @@ class CollectionDetailsFragment : Fragment() {
         inner class ViewHolder(private val binding: ItemSavedPaperBinding) : RecyclerView.ViewHolder(binding.root) {
 
             fun bind(paper: ArxivPaper) {
+                binding.tvPaperCategories.text = paper.allCategories.joinToString(" ") { it.categoryId }
                 binding.tvPaperTitle.text = paper.title
                 binding.tvPaperAuthors.text = paper.authors.joinToString(", ") { it.name }
                 
@@ -152,39 +144,6 @@ class CollectionDetailsFragment : Fragment() {
                         }
                     }
                     popup.show()
-                }
-
-                binding.btnReadDefault.setOnClickListener {
-                    val bundle = Bundle().apply {
-                        putString("arxiv_id", paper.arxivId)
-                        putString("reader_mode", "PDF")
-                    }
-                    findNavController().navigate(R.id.action_collectionDetails_to_paperReader, bundle)
-                }
-
-                binding.btnReadDropdown.setOnClickListener { view ->
-                    val popup = PopupMenu(view.context, view)
-                    popup.menu.add(R.string.read_pdf)
-                    if (!paper.htmlUrl.isNullOrBlank()) {
-                        popup.menu.add(R.string.read_html)
-                    }
-                    popup.setOnMenuItemClickListener { menuItem ->
-                        val mode = if (menuItem.itemId == R.string.read_html) "HTML" else "PDF"
-                        val bundle = Bundle().apply {
-                            putString("arxiv_id", paper.arxivId)
-                            putString("reader_mode", mode)
-                        }
-                        findNavController().navigate(R.id.action_collectionDetails_to_paperReader, bundle)
-                        true
-                    }
-                    popup.show()
-                }
-                
-                binding.cgTags.removeAllViews()
-                for (tag in paper.allCategories) {
-                    val chip = Chip(binding.root.context)
-                    chip.text = binding.root.context.getString(tag.displayNameRes)
-                    binding.cgTags.addView(chip)
                 }
 
                 binding.root.setOnClickListener {

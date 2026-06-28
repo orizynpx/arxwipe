@@ -4,20 +4,18 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
-import android.content.Intent
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.hilt.work.HiltWorker
+import androidx.navigation.NavDeepLinkBuilder
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import androidx.work.workDataOf
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
-import io.github.orizynpx.arxwipe.MainActivity
 import io.github.orizynpx.arxwipe.R
 import io.github.orizynpx.arxwipe.domain.model.Notification
 import io.github.orizynpx.arxwipe.domain.repository.NotificationRepository
-import io.github.orizynpx.arxwipe.domain.repository.PaperRepository
 import io.github.orizynpx.arxwipe.domain.usecase.CompileNewTriageUseCase
 import timber.log.Timber
 import java.util.UUID
@@ -82,16 +80,10 @@ class TriageSyncWorker @AssistedInject constructor(
             applicationContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         notificationManager.createNotificationChannel(channel)
 
-        val intent = Intent(applicationContext, MainActivity::class.java).apply {
-            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-        }
-        
-        val pendingIntent: PendingIntent = PendingIntent.getActivity(
-            applicationContext, 
-            0, 
-            intent, 
-            PendingIntent.FLAG_IMMUTABLE
-        )
+        val pendingIntent: PendingIntent = NavDeepLinkBuilder(applicationContext)
+            .setGraph(R.navigation.nav_graph)
+            .setDestination(R.id.receivedNotificationsFragment)
+            .createPendingIntent()
 
         val builder = NotificationCompat.Builder(applicationContext, channelId)
             .setSmallIcon(R.drawable.arxwipe_logomark)

@@ -2,6 +2,7 @@ package io.github.orizynpx.arxwipe.data.remote
 
 import okhttp3.Interceptor
 import okhttp3.Response
+import timber.log.Timber
 import java.util.concurrent.atomic.AtomicLong
 
 class RateLimitInterceptor : Interceptor {
@@ -28,6 +29,27 @@ class RateLimitInterceptor : Interceptor {
             }
         }
 
-        return chain.proceed(request)
+        var response = chain.proceed(request)
+        
+        
+        if (response.code == 429 && host == "export.arxiv.org") {
+            Timber.w("Received HTTP 429 from arXiv. Waiting before retry...")
+            response.close()
+            
+            
+            try {
+                Thread.sleep(5000)
+            } catch (e: InterruptedException) {
+                Thread.currentThread().interrupt()
+            }
+            
+            
+            lastRequestTime.set(System.currentTimeMillis())
+            
+            
+            response = chain.proceed(request)
+        }
+
+        return response
     }
 }

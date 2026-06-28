@@ -38,6 +38,7 @@
 
     
     <string name="search_papers_hint">Search papers…</string>
+    <string name="search_instruction">Search paper titles using the search bar above</string>
     <string name="filter_categories">Filter by category</string>
     <string name="clear_all">Clear all</string>
     <string name="show_results">Show results</string>
@@ -51,6 +52,8 @@
 
     
     <string name="error_network">Network error. Please check your internet connection.</string>
+    <string name="error_timeout">Request timed out. The arXiv server might be slow or busy.</string>
+    <string name="error_rate_limit">Too many requests. Please wait a moment before trying again.</string>
     <string name="error_empty_result">No new papers found. Try adding more categories in Profile.</string>
     <string name="error_no_papers_available">The arXiv feed is currently empty. Please check back later!</string>
 
@@ -72,6 +75,7 @@
     <string name="error_no_readable_format">No readable format available</string>
     <string name="error_download_failed">Failed to download PDF: %1$s</string>
     <string name="error_pdf_open_failed">Failed to open PDF: %1$s</string>
+    <string name="reading_view">Reading View</string>
 
     
     <string name="menu_settings">Settings</string>
@@ -392,4 +396,5 @@
     <string name="cat_stat_ml_desc">Statistical Grounding</string>
     <string name="cat_stat_th_name">Statistics Theory</string>
     <string name="cat_stat_th_desc">Asymptotics, Bayesian, Testing</string>
+    <string name="menu_refresh">Refresh</string>
 </resources>

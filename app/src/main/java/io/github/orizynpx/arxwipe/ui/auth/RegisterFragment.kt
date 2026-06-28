@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
@@ -23,7 +24,7 @@ class RegisterFragment : Fragment() {
 
     private var _binding: FragmentRegisterBinding? = null
     private val binding get() = _binding!!
-    private val viewModel: AuthViewModel by viewModels()
+    private val viewModel: AuthViewModel by activityViewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -60,7 +61,11 @@ class RegisterFragment : Fragment() {
                         }
                         is AuthState.Authenticated -> {
                             binding.progressBar.isVisible = false
-                            findNavController().navigate(R.id.action_registerFragment_to_onboardingFragment)
+                            
+                            
+                            if (!findNavController().popBackStack(R.id.profileFragment, false)) {
+                                findNavController().navigate(R.id.action_registerFragment_to_onboardingFragment)
+                            }
                         }
                         is AuthState.Error -> {
                             binding.progressBar.isVisible = false

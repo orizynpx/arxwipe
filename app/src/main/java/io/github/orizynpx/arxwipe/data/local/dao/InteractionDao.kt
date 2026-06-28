@@ -1,6 +1,10 @@
 package io.github.orizynpx.arxwipe.data.local.dao
 
-import androidx.room.*
+import androidx.room.Dao
+import androidx.room.Insert
+import androidx.room.OnConflictStrategy
+import androidx.room.Query
+import androidx.room.Transaction
 import io.github.orizynpx.arxwipe.data.local.entity.SwipeInteractionEntity
 import io.github.orizynpx.arxwipe.data.local.entity.TriagePaperCrossRef
 import kotlinx.coroutines.flow.Flow

@@ -7,8 +7,8 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import io.github.orizynpx.arxwipe.domain.model.Notification
 import io.github.orizynpx.arxwipe.databinding.ItemNotificationBinding
+import io.github.orizynpx.arxwipe.domain.model.Notification
 import timber.log.Timber
 
 class NotificationAdapter(

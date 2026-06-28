@@ -3,13 +3,13 @@ package io.github.orizynpx.arxwipe.ui.cardstackview.internal;
 import android.view.animation.Interpolator;
 import android.view.animation.LinearInterpolator;
 
+import java.util.List;
+
 import io.github.orizynpx.arxwipe.ui.cardstackview.Direction;
 import io.github.orizynpx.arxwipe.ui.cardstackview.RewindAnimationSetting;
 import io.github.orizynpx.arxwipe.ui.cardstackview.StackFrom;
 import io.github.orizynpx.arxwipe.ui.cardstackview.SwipeAnimationSetting;
 import io.github.orizynpx.arxwipe.ui.cardstackview.SwipeableMethod;
-
-import java.util.List;
 
 public class CardStackSetting {
     public StackFrom stackFrom = StackFrom.None;

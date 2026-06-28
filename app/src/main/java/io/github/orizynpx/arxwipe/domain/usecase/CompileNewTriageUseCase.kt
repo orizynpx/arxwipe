@@ -25,12 +25,31 @@ class CompileNewTriageUseCase @Inject constructor(
         val categories = prefs.selectedCategoryIds
 
         
+        val lastConfigCategories = preferencesRepository.getLastTriageConfigCategories().first()
+        val lastConfigBatchSize = preferencesRepository.getLastTriageConfigBatchSize().first()
+        val isMismatch = lastConfigCategories != categories.toSet() || lastConfigBatchSize != batchSize
+        
+        if (isMismatch) {
+            Timber.d("Preference mismatch detected (Categories: $lastConfigCategories -> ${categories.toSet()}, Batch: $lastConfigBatchSize -> $batchSize). Forcing re-compile.")
+            interactionRepository.clearTriage()
+        }
+
+        
         val activeTriage = interactionRepository.getActiveTriage()
         val currentIndex = preferencesRepository.getCurrentTriageIndex().first()
         
-        if (!force && activeTriage != null && currentIndex < activeTriage.papers.size) {
+        if (!force && !isMismatch && activeTriage != null && currentIndex < activeTriage.papers.size) {
             Timber.d("Active triage still has ${activeTriage.papers.size - currentIndex} papers. Reusing.")
             return activeTriage
+        }
+
+        
+        val lastTriageDate = preferencesRepository.getLastTriageDate().first()
+        val today = LocalDate.now().toString()
+        if (!force && !isMismatch && lastTriageDate == today) {
+            Timber.d("Already compiled a triage today ($today). Skipping auto-compile.")
+            
+            return activeTriage ?: Triage(Uuid.random(), emptyList())
         }
 
         
@@ -64,8 +83,9 @@ class CompileNewTriageUseCase @Inject constructor(
         )
         interactionRepository.replaceTriage(newTriage)
         
-        val today = LocalDate.now().toString()
         preferencesRepository.saveLastTriageDate(today)
+        preferencesRepository.saveLastTriageConfigCategories(categories.toSet())
+        preferencesRepository.saveLastTriageConfigBatchSize(batchSize)
         Timber.d("Compiled new triage with ${batch.size} papers.")
         return newTriage
     }

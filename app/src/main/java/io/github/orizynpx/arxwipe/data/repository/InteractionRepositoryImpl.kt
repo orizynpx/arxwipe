@@ -2,14 +2,16 @@ package io.github.orizynpx.arxwipe.data.repository
 
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
-import io.github.orizynpx.arxwipe.domain.repository.InteractionRepository
-import io.github.orizynpx.arxwipe.domain.repository.PreferencesRepository
 import io.github.orizynpx.arxwipe.data.local.dao.InteractionDao
 import io.github.orizynpx.arxwipe.data.local.dao.PaperDao
 import io.github.orizynpx.arxwipe.data.local.entity.SwipeInteractionEntity
 import io.github.orizynpx.arxwipe.data.local.entity.TriagePaperCrossRef
 import io.github.orizynpx.arxwipe.data.local.entity.toDomain
-import io.github.orizynpx.arxwipe.domain.model.*
+import io.github.orizynpx.arxwipe.domain.model.SwipeInteraction
+import io.github.orizynpx.arxwipe.domain.model.SwipeType
+import io.github.orizynpx.arxwipe.domain.model.Triage
+import io.github.orizynpx.arxwipe.domain.repository.InteractionRepository
+import io.github.orizynpx.arxwipe.domain.repository.PreferencesRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
@@ -70,6 +72,12 @@ class InteractionRepositoryImpl @Inject constructor(
         val lastSwipeEntity = interactionDao.getLastInteraction() ?: return null
         interactionDao.undoLastSwipe()
         
+        firebaseAuth.currentUser?.uid?.let { userId ->
+            firestore.collection("users").document(userId)
+                .collection("interactions").document(lastSwipeEntity.swipeId)
+                .delete()
+        }
+
         val currentIndex = preferencesRepository.getCurrentTriageIndex().first()
         if (currentIndex > 0) {
             preferencesRepository.saveTriageIndex(currentIndex - 1)

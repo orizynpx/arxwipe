@@ -5,8 +5,8 @@ import androidx.hilt.work.HiltWorkerFactory
 import androidx.work.Configuration
 import com.google.android.material.color.DynamicColors
 import com.google.android.material.color.DynamicColorsOptions
-import io.github.orizynpx.arxwipe.domain.repository.PreferencesRepository
 import dagger.hilt.android.HiltAndroidApp
+import io.github.orizynpx.arxwipe.domain.repository.PreferencesRepository
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import timber.log.Timber

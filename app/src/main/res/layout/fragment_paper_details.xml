@@ -32,6 +32,13 @@
             android:orientation="vertical"
             android:padding="16dp">
 
+            <com.google.android.material.chip.ChipGroup
+                android:id="@+id/cg_categories"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                app:chipSpacingHorizontal="8dp" />
+
             <TextView
                 android:id="@+id/tv_title"
                 style="?attr/textAppearanceHeadlineSmall"
@@ -46,13 +53,6 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
                 android:textColor="?attr/colorOnSurfaceVariant" />
-
-            <com.google.android.material.chip.ChipGroup
-                android:id="@+id/cg_categories"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
-                app:chipSpacingHorizontal="8dp" />
 
             <View
                 android:layout_width="match_parent"
@@ -143,36 +143,41 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:elevation="8dp"
-        android:orientation="horizontal"
+        android:orientation="vertical"
         android:padding="16dp"
         app:layout_constraintBottom_toBottomOf="parent">
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_save"
             style="@style/Widget.Material3.Button.TonalButton"
-            android:layout_width="0dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
             android:text="@string/save_to_read_later"
             app:icon="@drawable/bookmark_add_24dp_e3e3e3_fill0_wght400_grad0_opsz24" />
 
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btn_read_pdf"
-            style="@style/Widget.Material3.Button"
-            android:layout_width="0dp"
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:layout_weight="1"
-            android:text="@string/read_pdf" />
+            android:layout_marginTop="8dp"
+            android:orientation="horizontal">
 
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btn_read_html"
-            style="@style/Widget.Material3.Button"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:layout_weight="1"
-            android:text="@string/read_html" />
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_read_pdf"
+                style="@style/Widget.Material3.Button"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/read_pdf" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_read_html"
+                style="@style/Widget.Material3.Button"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_weight="1"
+                android:text="@string/read_html" />
+        </LinearLayout>
 
     </LinearLayout>
 

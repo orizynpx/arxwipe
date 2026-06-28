@@ -2,20 +2,17 @@ package io.github.orizynpx.arxwipe.domain.model
 
 import io.github.orizynpx.arxwipe.R
 
-
 data class FilterSubcategory(
     val label: String? = null,
     val labelRes: Int? = null,
     val codes: List<String>
 )
 
-
 data class FilterCategory(
     val name: String? = null,
     val nameRes: Int? = null,
     val subcategories: List<FilterSubcategory>
 )
-
 
 object SearchFilterCategories {
 
@@ -30,7 +27,6 @@ object SearchFilterCategories {
         add(fromTaxonomy(MainField.STATISTICS))
     }
 
-    
     private fun fromTaxonomy(field: MainField): FilterCategory {
         val subs = ArxivTaxonomy.getByCategoryGroup(field)
             .filterNot { it.categoryId.endsWith(".*") }
@@ -38,7 +34,6 @@ object SearchFilterCategories {
         return FilterCategory(nameRes = field.groupNameRes, subcategories = subs)
     }
 
-    
     private fun physicsGroup(): FilterCategory = FilterCategory(
         nameRes = MainField.PHYSICS.groupNameRes,
         subcategories = listOf(
@@ -57,6 +52,5 @@ object SearchFilterCategories {
         )
     )
 
-    
     val allSubcategories: List<FilterSubcategory> get() = groups.flatMap { it.subcategories }
 }
