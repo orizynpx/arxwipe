@@ -105,30 +105,28 @@ class PaperReaderFragment : Fragment() {
     }
 
     private fun showHtml(url: String) {
-        binding.pbLoading.isVisible = false
-        binding.wvReader.isVisible = true
-        
-        binding.wvReader.apply {
-            settings.apply {
-                javaScriptEnabled = true
-                domStorageEnabled = true
-                databaseEnabled = true
-                builtInZoomControls = true
-                displayZoomControls = false
-                useWideViewPort = true
-                loadWithOverviewMode = true
-            }
-            webViewClient = WebViewClient()
-            webChromeClient = object : WebChromeClient() {
-                override fun onProgressChanged(view: WebView?, newProgress: Int) {
-                    if (newProgress == 100) {
-                        binding.pbLoading.isVisible = false
-                    } else {
-                        binding.pbLoading.isVisible = true
+        _binding?.let { b ->
+            b.pbLoading.isVisible = false
+            b.wvReader.isVisible = true
+
+            b.wvReader.apply {
+                settings.apply {
+                    javaScriptEnabled = true
+                    domStorageEnabled = true
+                    databaseEnabled = true
+                    builtInZoomControls = true
+                    displayZoomControls = false
+                    useWideViewPort = true
+                    loadWithOverviewMode = true
+                }
+                webViewClient = WebViewClient()
+                webChromeClient = object : WebChromeClient() {
+                    override fun onProgressChanged(view: WebView?, newProgress: Int) {
+                        _binding?.pbLoading?.isVisible = (newProgress != 100)
                     }
                 }
+                loadUrl(url)
             }
-            loadUrl(url)
         }
     }
 
@@ -156,8 +154,10 @@ class PaperReaderFragment : Fragment() {
                 }
 
                 withContext(Dispatchers.Main) {
-                    binding.pbLoading.isVisible = false
-                    showPdf(file)
+                    _binding?.let { b ->
+                        b.pbLoading.isVisible = false
+                        showPdf(file)
+                    }
                 }
             } catch (e: Exception) {
                 withContext(Dispatchers.Main) {
@@ -177,17 +177,19 @@ class PaperReaderFragment : Fragment() {
 
             val pageWidth = resources.displayMetrics.widthPixels
 
-            binding.wvReader.isVisible = false
-            binding.rvPdfPages.isVisible = true
-            binding.rvPdfPages.layoutManager = LinearLayoutManager(requireContext())
-            binding.rvPdfPages.adapter = PdfPageAdapter(renderer, pageWidth)
+            _binding?.apply {
+                wvReader.isVisible = false
+                rvPdfPages.isVisible = true
+                rvPdfPages.layoutManager = LinearLayoutManager(requireContext())
+                rvPdfPages.adapter = PdfPageAdapter(renderer, pageWidth)
+            }
         } catch (e: Exception) {
             showError(getString(R.string.error_pdf_open_failed, e.message ?: ""))
         }
     }
 
     private fun closePdf() {
-        binding.rvPdfPages.adapter = null
+        _binding?.rvPdfPages?.adapter = null
         pdfRenderer?.close()
         pdfRenderer = null
         pdfDescriptor?.close()
@@ -201,9 +203,13 @@ class PaperReaderFragment : Fragment() {
     }
 
     private fun showError(message: String) {
-        binding.pbLoading.isVisible = false
-        binding.tvError.text = message
-        binding.tvError.isVisible = true
-        Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
+        _binding?.apply {
+            pbLoading.isVisible = false
+            tvError.text = message
+            tvError.isVisible = true
+        }
+        context?.let {
+            Toast.makeText(it, message, Toast.LENGTH_SHORT).show()
+        }
     }
 }
