@@ -17,11 +17,9 @@ interface PreferencesRepository {
     fun getLastFetchTime(): Flow<Long>
     suspend fun saveLastFetchTime(time: Long)
 
-    
     fun getLastFetchDate(): Flow<String>
     suspend fun saveLastFetchDate(date: String)
 
-    
     fun getLastTriageDate(): Flow<String>
     suspend fun saveLastTriageDate(date: String)
 
@@ -33,6 +31,5 @@ interface PreferencesRepository {
     fun isDynamicColorsEnabled(): Flow<Boolean>
     suspend fun saveDynamicColorsPreference(enabled: Boolean)
 
-    suspend fun syncWithRemote()
     suspend fun clearPreferences()
 }

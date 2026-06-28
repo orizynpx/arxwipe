@@ -2,6 +2,7 @@ package io.github.orizynpx.arxwipe.ui.discover
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.appcompat.view.ContextThemeWrapper
 import androidx.core.content.ContextCompat
 import androidx.core.os.bundleOf
 import androidx.navigation.findNavController
@@ -36,7 +37,7 @@ class PaperAdapter(private var papers: List<ArxivPaper> = emptyList()) : Recycle
     class ViewHolder(private val binding: ItemCardBinding) : RecyclerView.ViewHolder(binding.root) {
 
         fun bind(paper: ArxivPaper) {
-            binding.paperTitle.text = paper.title
+            binding.tvCardPaperTitle.text = paper.title
             binding.paperAuthors.text = paper.authors.joinToString(", ") { it.name }
             binding.paperAuthors.maxLines = 2
             binding.paperAuthors.setOnClickListener {
@@ -50,9 +51,10 @@ class PaperAdapter(private var papers: List<ArxivPaper> = emptyList()) : Recycle
 
             binding.chipGroup.removeAllViews()
             val context = binding.root.context
+            val styledContext = ContextThemeWrapper(context, R.style.Widget_App_Chip_Compact)
 
             
-            val primaryChip = Chip(context)
+            val primaryChip = Chip(styledContext)
             primaryChip.text = paper.primaryCategory.categoryId
             primaryChip.setChipBackgroundColorResource(R.color.md_theme_primaryContainer)
             primaryChip.setTextColor(ContextCompat.getColor(context, R.color.md_theme_onPrimaryContainer))
@@ -64,7 +66,7 @@ class PaperAdapter(private var papers: List<ArxivPaper> = emptyList()) : Recycle
                 .distinctBy { it.categoryId }
                 .filter { it.categoryId != paper.primaryCategory.categoryId }
                 .forEach { tag ->
-                    val chip = Chip(context)
+                    val chip = Chip(styledContext)
                     chip.text = tag.categoryId
                     chip.setChipBackgroundColorResource(android.R.color.transparent)
                     chip.setChipStrokeColorResource(R.color.md_theme_outlineVariant)

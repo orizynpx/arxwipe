@@ -18,7 +18,7 @@ import io.github.orizynpx.arxwipe.data.sync.FirebaseSyncManager
 import io.github.orizynpx.arxwipe.databinding.ActivityMainBinding
 import io.github.orizynpx.arxwipe.domain.repository.PaperRepository
 import io.github.orizynpx.arxwipe.domain.repository.PreferencesRepository
-import io.github.orizynpx.arxwipe.work.TriageSyncWorker
+import io.github.orizynpx.arxwipe.data.work.TriageSyncWorker
 import java.time.Duration
 import java.time.ZonedDateTime
 import java.util.concurrent.TimeUnit

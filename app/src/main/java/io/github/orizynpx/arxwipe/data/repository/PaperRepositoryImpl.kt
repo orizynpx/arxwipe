@@ -7,7 +7,7 @@ import io.github.orizynpx.arxwipe.data.local.entity.toDomain
 import io.github.orizynpx.arxwipe.data.local.entity.toEntity
 import io.github.orizynpx.arxwipe.data.remote.ArxivApiService
 import io.github.orizynpx.arxwipe.data.remote.dto.ArxivFeedDto
-import io.github.orizynpx.arxwipe.data.remote.dto.toDomain
+import io.github.orizynpx.arxwipe.data.remote.mapper.toDomain
 import io.github.orizynpx.arxwipe.domain.model.ArxivPaper
 import io.github.orizynpx.arxwipe.domain.model.ArxivTaxonomy
 import io.github.orizynpx.arxwipe.domain.model.PaperCategory

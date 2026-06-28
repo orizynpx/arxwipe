@@ -22,14 +22,15 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 app:chipSpacingHorizontal="8dp"
+                app:chipSpacingVertical="-8dp"
                 app:singleLine="false" />
 
             <TextView
-                android:id="@+id/paperTitle"
+                android:id="@+id/tv_card_paper_title"
                 style="?attr/textAppearanceTitleLarge"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
+                android:layout_marginTop="4dp"
                 android:text="Deep Residual Learning for Image Recognition"
                 android:textColor="?attr/colorOnSurface"
                 android:textStyle="bold" />

@@ -11,4 +11,10 @@
         <item name="cornerSizeTopLeft">0dp</item>
         <item name="cornerSizeBottomLeft">0dp</item>
     </style>
+
+    <style name="Widget.App.Chip.Compact" parent="Widget.Material3.Chip.Assist">
+        <item name="ensureMinTouchTargetSize">false</item>
+        <item name="chipMinHeight">24dp</item>
+        <item name="android:textSize">12sp</item>
+    </style>
 </resources>

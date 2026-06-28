@@ -3,7 +3,7 @@ package io.github.orizynpx.arxwipe.data.local
 import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
-import io.github.orizynpx.arxwipe.data.local.converter.RoomConverters
+import io.github.orizynpx.arxwipe.data.local.RoomConverters
 import io.github.orizynpx.arxwipe.data.local.dao.CollectionDao
 import io.github.orizynpx.arxwipe.data.local.dao.InteractionDao
 import io.github.orizynpx.arxwipe.data.local.dao.NotificationDao

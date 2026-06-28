@@ -17,10 +17,10 @@ import androidx.navigation.fragment.findNavController
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import dagger.hilt.android.AndroidEntryPoint
-import io.github.orizynpx.arxwipe.ArXwipeApplication
+import io.github.orizynpx.arxwipe.ArxwipeApplication
 import io.github.orizynpx.arxwipe.databinding.FragmentSettingsBinding
 import io.github.orizynpx.arxwipe.domain.repository.PreferencesRepository
-import io.github.orizynpx.arxwipe.work.TestNotificationWorker
+import io.github.orizynpx.arxwipe.data.work.TestNotificationWorker
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import javax.inject.Inject
@@ -60,10 +60,10 @@ class SettingsFragment : Fragment() {
         }
 
         binding.dynamicColorSwitch.setOnCheckedChangeListener { _, isChecked ->
-            if (isChecked != ArXwipeApplication.isDynamicColorsEnabled) {
+            if (isChecked != ArxwipeApplication.isDynamicColorsEnabled) {
                 lifecycleScope.launch {
                     repository.saveDynamicColorsPreference(isChecked)
-                    ArXwipeApplication.isDynamicColorsEnabled = isChecked
+                    ArxwipeApplication.isDynamicColorsEnabled = isChecked
                     activity?.recreate()
                 }
             }

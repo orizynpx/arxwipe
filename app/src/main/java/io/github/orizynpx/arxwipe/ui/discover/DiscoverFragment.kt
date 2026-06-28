@@ -18,7 +18,6 @@ import androidx.work.WorkManager
 import androidx.work.workDataOf
 import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
-import io.github.orizynpx.arxwipe.ui.discover.PaperAdapter
 import io.github.orizynpx.arxwipe.R
 import io.github.orizynpx.arxwipe.databinding.FragmentDiscoverBinding
 import io.github.orizynpx.arxwipe.domain.model.SwipeType
@@ -31,7 +30,7 @@ import io.github.orizynpx.arxwipe.ui.cardstackview.StackFrom
 import io.github.orizynpx.arxwipe.ui.cardstackview.SwipeAnimationSetting
 import io.github.orizynpx.arxwipe.ui.cardstackview.SwipeableMethod
 import io.github.orizynpx.arxwipe.ui.dialogs.CollectionDialogs
-import io.github.orizynpx.arxwipe.work.TriageSyncWorker
+import io.github.orizynpx.arxwipe.data.work.TriageSyncWorker
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import timber.log.Timber

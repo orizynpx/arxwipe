@@ -177,10 +177,6 @@ class UserPreferencesRepository @Inject constructor(
         setOnboardingComplete(true)
     }
 
-    override suspend fun syncWithRemote() {
-        
-    }
-
     override suspend fun clearPreferences() {
         Timber.d("Clearing all preferences")
         context.dataStore.edit { preferences ->
